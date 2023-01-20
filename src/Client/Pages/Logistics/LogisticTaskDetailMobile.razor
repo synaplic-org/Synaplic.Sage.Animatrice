@@ -1,0 +1,253 @@
+﻿@page "/Mobile/Logistics/{ProcessType}/Details/{TaskObjectID}"
+@using Uni.Scan.Shared.Extensions
+@using Uni.Scan.Transfer.DataModel.LogisticTask
+@layout NoAppBarLayout
+
+<style>
+    .mud-input > input.mud-input-root-outlined, div.mud-input-slot.mud-input-root-outlined {
+        padding: 13px 14px;
+    }
+
+    /*.test > div.mud-input-control-input-container > label > span.mud-icon-button {
+                padding-top: 8px;
+                padding-bottom: 2px;
+            }*/
+</style>
+
+<MudAppBar Elevation="5" Dense="true" Style="border-top: solid 2px #7398c1;">
+
+    @if (_currentTask != null)
+    {
+        <MudText Typo="Typo.h6" Class="ml-2">@(_currentTask.OperationType ?? "") : @(_currentTask.Id)</MudText>
+    }
+
+    <MudSpacer />
+    @*
+    <MudIconButton Disabled="_global.IsLoading" Icon="@Icons.Material.Filled.DoneAll" Size="Size.Medium" Style="background: #4083e7;color: #ffffff; padding: 5px;border: solid" Edge="Edge.Start"
+    OnClick="SaveTask" />*@
+
+</MudAppBar>
+@*<div style="height: 48px">
+     <MudTextField @ref="barcodeInputText" T="string" ValueChanged="ValueInputChanged" DebounceInterval="50" Variant="Variant.Text" Adornment="Adornment.None" AdornmentIcon="@Icons.Filled.Search" />
+</div>*@
+@if (_currentLine != null)
+{
+    <table style="width: 100%;">
+        <tr>
+            @if (_showNavigationArrows)
+            {
+                <td style="width: 40px">
+                    <MudFab Disabled="_global.IsLoading" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.ArrowLeft" Size="Size.Small" OnClick="async () =>await MoveStep(-1)" />
+                </td>
+            }
+
+            <td style="width:40px;padding: 0px;">
+                <MudButton @ref="_pageNumberButton" Disabled="_global.IsLoading" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">@(_currentLine.LineItemID.ToString() + " / " + _taskLinesCount)</MudButton>
+                </td>
+                <td>
+                    <MudButton Disabled="_global.IsLoading" Variant="Variant.Filled"
+                       Color="_currentLine.Errors.IsNullOrEmpty() ? Color.Primary : Color.Error"
+                       StartIcon="@(_currentLine.Errors.IsNullOrEmpty() ? string.Empty : Icons.Material.Outlined.Error)"
+                       FullWidth="true" OnClick="ShowLinesListe"> @_currentLine.ProductID</MudButton>
+                </td>
+                @if (_showNavigationArrows)
+            {
+                <td style="width: 40px">
+                    <MudFab Disabled="_global.IsLoading" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" OnClick="async () =>await MoveStep(1)" />
+                </td>
+            }
+
+        </tr>
+    </table>
+    <MudPaper Elevation="3" class="pa-3 mt-3" Style="border-left: solid 4px #8a8a8a;max-height: 174px00px;height: 74px">
+        <div class="d-flex" style="">
+            <MudText Class="fz-13" style="color:#0a5291; font-weight: bold; overflow: hidden; white-space: nowrap;text-overflow: ellipsis ">
+                @(_currentLine.ProductDescription ?? _currentLine.ProductID)
+            </MudText>
+        </div>
+        <div class="d-flex" style="padding-right: 4px">
+            @* @if (CanHaveDevialtion())
+        {
+        <MudCheckBox @bind-Checked="@_currentLine.DeviationFound"
+        Label="@Localizer["Ecart"]" Class="test" Style="Color:red"
+        Size="Size.Medium" Color="Color.Error"></MudCheckBox>
+        }*@
+
+
+            <div class="d-flex ml-auto">
+
+                <MudText Class="mt-1 fz-13">
+                    <strong style="color: #0a5291">
+                        @_currentLine.TotalQuantity.ToString("N2")
+                    </strong>
+                    /
+                    <strong style="font-weight: bold">
+                        @_currentLine.PlanQuantity.ToString("N2") @_currentLine.PlanQuantityUnitCode
+                    </strong>
+                </MudText>
+            </div>
+
+        </div>
+    </MudPaper>
+
+    <div style="height:calc(100vh - 250px); overflow-y: auto; margin-top: 4px;padding-bottom: 10px">
+        @if (_global.IsLoading)
+        {
+            <MudProgressLinear Color="Color.Tertiary" Indeterminate="true" Size="Size.Medium" Class="mx-3" />
+        }
+
+        @if (_currentLine?.Details.IsNullOrEmpty() == false)
+        {
+            @for (int i = _currentLine.Details.Count - 1; i >= 0; i--)
+            {
+                LogisticTaskItemDetailDTO2 item = _currentLine.Details[i];
+                <MudPaper Elevation="1" class="pa-2 mt-3" Style="@(item.Disabled ? "border-left: solid 4px " :item.IsNew ? "border-left: solid 4px #3d9c54" : "border-left: solid 4px #0a5291 ")">
+
+
+
+
+
+                    <div>
+
+                        @if (CanEditSourceArea())
+                        {
+                            <MudTextField For="@(() => item.SourceLogisticsAreaID)" Variant="_global.TestFiledVariant"
+                          @bind-Value="item.SourceLogisticsAreaID" Label="@Localizer["Zone Source"]" OnBlur="(() => ValidateItem(item))"
+                          Adornment="Adornment.End" AdornmentIcon="@Icons.Filled.RemoveRedEye" AdornmentColor="Color.Secondary"
+                          OnAdornmentClick="@(async () =>await SelectStockID(item))"
+                          Clearable="true"
+                          Error="item.LogisticSourceAreaError"
+                          ReadOnly="item.Disabled" />
+                        }
+                        else if (CanViewSourceArea())
+                        {
+                            <MudField Style="" Label="@Localizer["Zone Source"]" Variant="_global.TestFiledVariant">@item.SourceLogisticsAreaID</MudField>
+                        }
+
+                        @if (CanEditTargetArea())
+                        {
+                            <MudTextField For="@(() => item.TargetLogisticsAreaID)" Variant="_global.TestFiledVariant"
+                          @bind-Value="item.TargetLogisticsAreaID" Label="@Localizer["Zone Cible"]" OnBlur="(() => ValidateItem(item))"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.RemoveRedEye" AdornmentColor="Color.Secondary"
+                          OnAdornmentClick="@(async () =>await SelectTargetArea(item))"
+                          Clearable="true"
+                          Error="item.LogisticTargetAreaError"
+                          Disabled="item.Disabled" />
+                        }
+                        else if (CanViewTargetArea())
+                        {
+                            <MudTextField For="@(() => item.TargetLogisticsAreaID)" Variant="_global.TestFiledVariant"
+                          @bind-Value="item.TargetLogisticsAreaID" Label="@Localizer["Zone Cible"]"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.ZoomInMap" AdornmentColor="Color.Dark"
+                          ReadOnly="@true" />
+                        }
+
+
+
+                        @if (_currentLine.IsBatchManaged)
+                        {
+                            @if (CaneEditStockID())
+                            {
+                                <MudTextField For="@(() => item.IdentifiedStockIDNew)" Variant="_global.TestFiledVariant"
+                          @bind-Value="item.IdentifiedStockIDNew" Label="@Localizer["ID Stock"]"
+                          AdornmentColor="Color.Secondary"
+                          Clearable="true"
+                          Error="item.StockIDError"
+                          Disabled="item.Disabled" />
+                            }
+                            else
+                            {
+                                <MudTextField For="@(() => item.IdentifiedStockID)" Variant="_global.TestFiledVariant"
+                          @bind-Value="item.IdentifiedStockID" Label="@Localizer["ID Stock"]"
+                          AdornmentColor="Color.Secondary"
+                          ReadOnly="@true" />
+                            }
+
+                        }
+
+                        @if (item.Disabled)
+                        {
+                            <MudNumericField For="@(() => item.TotalConfirmedQuantity)" Variant="_global.TestFiledVariant"
+                             @bind-Value="item.TotalConfirmedQuantity" Format="N2" Label="@(Localizer["Quantité en"] + "  " + item.TotalConfirmedQuantityUnitCode)"
+                             HideSpinButtons="true" Adornment="Adornment.End" AdornmentColor="Color.Info"
+                             Style="color: #424242;"
+                             AdornmentIcon="@Icons.Filled.Balance"
+                             Culture="_global.CustomCulture"
+                             ReadOnly="true" />
+                        }
+                        else
+                        {
+
+                            <MudNumericField For="@(() => item.ConfirmQuantity)" Variant="_global.TestFiledVariant"
+                             @bind-Value="item.ConfirmQuantity" Format="N2" Label="@(Localizer["Quantité en"] + "  " + item.ConfirmQuantityUnitCode)"
+                             HideSpinButtons="true" Adornment="Adornment.Start" AdornmentColor="Color.Info"
+                             Style="@(item.Disabled ? "color: #424242;text-align: center;":"font-weight: bolder;color: #0a5291;text-align: center;")"
+                             OnAdornmentClick="@(() => FilleQuantite(item))" AdornmentIcon="@Icons.Filled.Balance"
+                             Clearable="true"
+                             Disabled="item.Disabled"
+                             Culture="_global.CustomCulture"
+                             DisableUnderLine="item.Disabled" />
+                        }
+
+
+                    </div>
+
+                    @if (item.IsNew)
+                    {
+                        <table style="width: 100%;margin-top:5px">
+                            <tr>
+
+                                <td style="width: 50%"></td>
+                                <td style="width: 24px"><MudIconButton Class="icon-paper-close" OnClick="() => DeleteItem(item)" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="add to favorite"></MudIconButton></td>
+                                <td style="width: 50%"></td>
+
+                            </tr>
+                        </table>
+                    }
+
+                </MudPaper>
+
+            }
+        }
+        else
+        {
+            @if (_global.IsLoading)
+            {
+                <MudProgressLinear Color="Color.Tertiary" Indeterminate="true" Size="Size.Medium" Class="mx-3" />
+            }
+        }
+
+
+
+    </div>
+
+
+}
+
+
+
+
+
+<div style="margin-bottom: 53px"></div>
+<MudAppBar Bottom="true" Fixed="true" Color="Color.Primary" Elevation="1" Class="mobile-footer-barr">
+    <MudIconButton Icon="@Icons.Material.Filled.KeyboardReturn" Style="background-color: orange;color: white" Edge="Edge.Start"
+                   OnClick="async () => await BackToParentAsync()" />
+
+    <MudSpacer />
+    @if (CanAddNewLine())
+    {
+        <MudIconButton Disabled="_global.IsLoading" Icon="@Icons.Material.Filled.Add" Class="" Style="background-color: #3d9c54; color: white" Edge="Edge.Start"
+                   OnClick="AddNewLine" />
+    }
+    <MudSpacer />
+    @if (_global.ShowScanButton)
+    {
+        <MudIconButton Disabled="_global.IsLoading" Icon="@Icons.Material.Filled.QrCode2" Class="" Style="background-color: #1E88E5;color: white" Edge="Edge.Start"
+                   OnClick="ScanBarCode" />
+    }
+
+    <MudIconButton Disabled="_global.IsLoading" Icon="@Icons.Material.Filled.MoreVert" Class="ml-3" Style="background-color: #1E88E5;color: white" Edge="Edge.End"
+                   OnClick="ShowActions" />
+
+
+</MudAppBar>

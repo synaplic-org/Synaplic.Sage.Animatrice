@@ -1,0 +1,43 @@
+﻿{
+  "ProviderId": "Unchase.OData.ConnectedService",
+  "Version": "1.5.1.0",
+  "GettingStartedDocument": {
+    "Uri": "https://msdn.microsoft.com/en-us/library/cc668772(v=vs.110).aspx"
+  },
+  "ExtendedData": {
+    "OperationImportsGenerator": 0,
+    "IncludeExtensionsT4File": true,
+    "GenerateOperationImports": false,
+    "ServiceName": "OData.UniscanService",
+    "AcceptAllUntrustedCertificates": true,
+    "Endpoint": "https://my429899.businessbydesign.cloud.sap/sap/byd/odata/cust/v1/uniscan/$metadata",
+    "EdmxVersion": {
+      "Major": 1,
+      "Minor": 0,
+      "Build": 0,
+      "Revision": 0,
+      "MajorRevision": 0,
+      "MinorRevision": 0
+    },
+    "GeneratedFileNamePrefix": "UniScanOdataService",
+    "UseNameSpacePrefix": true,
+    "NamespacePrefix": "Infrastructure.Bydesign.OData.UniScan",
+    "UseDataServiceCollection": true,
+    "UseAsyncDataServiceCollection": true,
+    "OpenGeneratedFilesOnComplete": false,
+    "LanguageOption": 0,
+    "FunctionImports": null,
+    "OperationImports": null,
+    "ExcludedOperationImportsNames": "",
+    "UseNetworkCredentials": true,
+    "NetworkCredentialsUserName": "ahmed",
+    "NetworkCredentialsPassword": "Welcome1Welcome2",
+    "NetworkCredentialsDomain": null,
+    "WebProxyUri": null,
+    "UseWebProxy": false,
+    "UseWebProxyCredentials": false,
+    "WebProxyNetworkCredentialsUserName": null,
+    "WebProxyNetworkCredentialsPassword": null,
+    "WebProxyNetworkCredentialsDomain": null
+  }
+}

@@ -1,0 +1,45 @@
+﻿<EditForm Model="@_editUserModel" OnValidSubmit="SubmitAsync">
+    <MudDialog>
+        <TitleContent>
+            @{
+                <MudText Typo="Typo.h6">
+                    <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" Class="mr-3 mb-n1" />
+                    @Localizer["Modifier Utilisateur"]
+                </MudText>
+            }
+        </TitleContent>
+        <DialogContent>
+         <MudTextField @bind-Value="@UserName" Disabled="true" />
+         <MudTextField @bind-Value="@Email" Disabled="true" />
+            
+            <MudSelect @bind-Value="@_editUserModel.EmployeeID" T="string" Text="@Localizer["Select employee"]" Label="@Localizer["Sélectionner un employé"]">
+
+                @{
+                    foreach (var e in _employees)
+                    {
+                        <MudSelectItem Value="@(@e.EmployeeID)">@e.BusinessPartnerFormattedName</MudSelectItem>
+                    }
+                }
+
+
+            </MudSelect>
+            <MudSelect @bind-Value="@_editUserModel.SiteID" T="string" Text="@Localizer["Select site"]" Label="@Localizer["Sélectionner un site"]">
+
+                @{
+                    foreach (var e in _sites)
+                    {
+                        <MudSelectItem Value="@(@e.SiteID)">@e.SiteName</MudSelectItem>
+                    }
+                }
+            </MudSelect>
+            
+
+        </DialogContent>
+        <DialogActions>
+            <MudButton Variant="Variant.Filled" OnClick="Cancel">@Localizer["Annuler"]</MudButton>
+            @{
+                <MudButton Variant="Variant.Filled" ButtonType="ButtonType.Submit"  Color="Color.Success">@Localizer["Enregistrer"]</MudButton>
+            }
+        </DialogActions>
+    </MudDialog>
+</EditForm>

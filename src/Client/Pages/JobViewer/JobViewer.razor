@@ -1,0 +1,19 @@
+﻿@page "/job-viewer"
+@attribute [Authorize(Policy = Permissions.Infrastructure.Jobs)]
+ 
+
+<MudPaper Elevation="9">
+    <iframe style="height: calc(100vh - 70px); overflow-y: scroll;padding: 5px" 
+            src="/jobs?access_token=@Permissions.Infrastructure.Jobs" 
+            frameborder="0"></iframe></MudPaper>
+            
+            
+@code
+{
+
+    protected override async Task OnInitializedAsync()
+    {
+        _global.CurrentTitle = Localizer["MONITEUR DES TACHES"];
+        await Task.Delay(1);
+    }
+}

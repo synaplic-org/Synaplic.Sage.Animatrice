@@ -1,0 +1,26 @@
+﻿@inherits LayoutComponentBase
+@*<audio id="notification" src="/media/notification.mp3"/>*@
+<MudThemeProvider Theme="_currentTheme"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+<AuthorizeView>
+    <NotAuthorized>
+
+        <CascadingValue Value="hubConnection">
+            @Body
+        </CascadingValue>
+
+    </NotAuthorized>
+    <Authorized>
+ 
+        <MudLayout RightToLeft="@_rightToLeft">
+            <MudMainContent Style="padding: 50px 0px 0px 0px;">
+                <MudContainer MaxWidth="MaxWidth.False" Style="padding: 4px;">
+                    <CascadingValue Value="hubConnection">
+                        @Body
+                    </CascadingValue>
+                </MudContainer>
+            </MudMainContent>
+        </MudLayout>
+    </Authorized>
+</AuthorizeView>

@@ -1,0 +1,164 @@
+﻿@inject Microsoft.Extensions.Localization.IStringLocalizer<AddLabelModal> _localizer
+@using Uni.Scan.Client.Infrastructure.ApiClients
+
+<style>
+    .mud-dialog-title {
+        background: #e6f1f8;
+        border-bottom: solid 3px #74bdf0;
+    }
+
+    .footerbar {
+        border-top: solid 1px #4e85c4ff;
+        background: #f0f9f1 !important;
+    }
+</style>
+
+<EditForm Model="@taskLabelDTO" OnValidSubmit="SaveAsync">
+    <FluentValidationValidator @ref="_fluentValidationValidator" />
+    <MudDialog>
+        <TitleContent>
+          
+            @if (_global.IsMobileView)
+            {
+                 @if (taskLabelDTO.Id == 0)
+                {
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Add" Class="mr-3 mb-n1" />
+                        @_localizer["Créer une Étiquette "]
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.RemoveRedEye" Class="mr-3 mb-n1" />
+                        @_localizer["Voir les détails de l'Étiquette"]
+                    </MudText>
+                }
+            }
+            else 
+            {
+                @if (taskLabelDTO.Id == 0)
+                {
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Add" Class="mr-3 mb-n1" />
+                        @_localizer["Créer une Étiquette "]
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Update" Class="mr-3 mb-n1" />
+                        @_localizer["Mettre a jour une Étiquette"]
+                    </MudText>
+                }
+            }
+
+               
+            
+        </TitleContent>
+        <DialogContent>
+
+            @if (_global.IsMobileView)
+            {
+                @if (taskLabelDTO.Id == 0)
+                { 
+                            <div style="height:calc(100vh - 110px); overflow-y:scroll">
+                            <MudTextField    Variant="Variant.Outlined" For="@(() => taskLabelDTO.ProductId)" @bind-Value="taskLabelDTO.ProductId" Label="@_localizer["Produit"]" />
+                            <MudNumericField  Variant="Variant.Outlined" HideSpinButtons="true" For="@(() => taskLabelDTO.PlanQuantity)" @bind-Value="taskLabelDTO.PlanQuantity" Label="@_localizer["Quantité"]"  
+                                              Culture="_global.CustomCulture"/>
+                            <MudNumericField  Variant="Variant.Outlined" HideSpinButtons="true" For="@(() => taskLabelDTO.QuatityOnLabel)" @bind-Value="@taskLabelDTO.QuatityOnLabel" Label="@_localizer["Colisage"]" 
+                                              Culture="_global.CustomCulture"/>
+                            <MudNumericField  Variant="Variant.Outlined" HideSpinButtons="true" For="@(() => taskLabelDTO.NbrEtiquettes)" @bind-Value="@taskLabelDTO.NbrEtiquettes" Label="@_localizer["Nombre d'Étiquettes"]" 
+                                              Culture="_global.CustomCulture"/>
+                            <MudTextField  Variant="Variant.Outlined" For="@(() => taskLabelDTO.IdentifiedStock)" @bind-Value="taskLabelDTO.IdentifiedStock" Label="@_localizer["Lot"]" />
+                            <MudTextField  Variant="Variant.Outlined" For="@(() => taskLabelDTO.SupplierIdentifiedStock)" @bind-Value="taskLabelDTO.SupplierIdentifiedStock" Label="@_localizer["Lot Fournisseur"]" />
+                            @*<MudDatePicker PickerVariant="PickerVariant.Dialog" Label="@_localizer["Date de Production"]" IconSize="Size.Small"  @bind-Date="@taskLabelDTO.ProductionDate" DisableToolbar="true" Variant="Variant.Outlined"  />
+                            <MudDatePicker PickerVariant="PickerVariant.Dialog" Label="@_localizer["Date d'expiration"]" IconSize="Size.Small" @bind-Date="@taskLabelDTO.ExpirationDate" DisableToolbar="true" Variant="Variant.Outlined" />
+                        *@
+                            </div>
+                }
+                else
+                {
+                        <div style="height:calc(100vh - 110px); overflow-y:scroll">
+                        <MudTextField Disabled  Variant="Variant.Outlined" For="@(() => taskLabelDTO.ProductId)" @bind-Value="taskLabelDTO.ProductId" Label="@_localizer["Produit"]" />
+                        <MudNumericField Disabled Variant="Variant.Outlined" HideSpinButtons="true" For="@(() => taskLabelDTO.PlanQuantity)" @bind-Value="taskLabelDTO.PlanQuantity" Label="@_localizer["Quantité"]" 
+                                         Culture="_global.CustomCulture"/>
+                        <MudNumericField Disabled Variant="Variant.Outlined" HideSpinButtons="true" For="@(() => taskLabelDTO.QuatityOnLabel)" @bind-Value="@taskLabelDTO.QuatityOnLabel" Label="@_localizer["Colisage"]" 
+                                         Culture="_global.CustomCulture"/>
+                        <MudNumericField Disabled Variant="Variant.Outlined" HideSpinButtons="true" For="@(() => taskLabelDTO.NbrEtiquettes)" @bind-Value="@taskLabelDTO.NbrEtiquettes" Label="@_localizer["Nombre d'Étiquettes"]" 
+                                         Culture="_global.CustomCulture"/>
+                        <MudTextField Disabled Variant="Variant.Outlined" For="@(() => taskLabelDTO.IdentifiedStock)" @bind-Value="taskLabelDTO.IdentifiedStock" Label="@_localizer["Lot"]" />
+                        <MudTextField Disabled Variant="Variant.Outlined" For="@(() => taskLabelDTO.SupplierIdentifiedStock)" @bind-Value="taskLabelDTO.SupplierIdentifiedStock" Label="@_localizer["Lot Fournisseur"]" />
+                        @*<MudDatePicker Disabled PickerVariant="PickerVariant.Dialog" Label="@_localizer["Date de Production"]" IconSize="Size.Small"  @bind-Date="@taskLabelDTO.ProductionDate" DisableToolbar="true" Variant="Variant.Outlined"  />
+                        <MudDatePicker Disabled PickerVariant="PickerVariant.Dialog" Label="@_localizer["Date d'expiration"]" IconSize="Size.Small" @bind-Date="@taskLabelDTO.ExpirationDate" DisableToolbar="true" Variant="Variant.Outlined" />
+                        *@
+                        </div>
+                }
+
+            }
+            else
+            {
+                <MudGrid>
+                    
+                    <MudItem xs="12" md="6">
+                        <MudTextField  Variant="Variant.Outlined" For="@(() => taskLabelDTO.ProductId)" @bind-Value="taskLabelDTO.ProductId" Label="@_localizer["Produit"]" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudNumericField Variant="Variant.Outlined" HideSpinButtons="true" For="@(() => taskLabelDTO.PlanQuantity)" @bind-Value="taskLabelDTO.PlanQuantity" Label="@_localizer["Quantité"]" Culture="_global.CustomCulture" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudNumericField Variant="Variant.Outlined" HideSpinButtons="true" For="@(() => taskLabelDTO.QuatityOnLabel)" @bind-Value="@taskLabelDTO.QuatityOnLabel" Label="@_localizer["Colisage"]" Culture="_global.CustomCulture" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudNumericField Variant="Variant.Outlined" HideSpinButtons="true" For="@(() => taskLabelDTO.NbrEtiquettes)" @bind-Value="@taskLabelDTO.NbrEtiquettes" Label="@_localizer["Nombre d'Étiquettes"]" Culture="_global.CustomCulture" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField  Variant="Variant.Outlined" For="@(() => taskLabelDTO.IdentifiedStock)" @bind-Value="taskLabelDTO.IdentifiedStock" Label="@_localizer["Lot"]" />
+                    </MudItem>
+                     <MudItem xs="12" md="6">
+                        <MudTextField  Variant="Variant.Outlined" For="@(() => taskLabelDTO.SupplierIdentifiedStock)" @bind-Value="taskLabelDTO.SupplierIdentifiedStock" Label="@_localizer["Lot Fournisseur"]" />
+                    </MudItem>
+                    @*<MudItem xs="12" md="6">
+                        <MudDatePicker Variant="Variant.Outlined" PickerVariant="PickerVariant.Dialog" Label="@_localizer["Date de Production"]" @bind-Date="@taskLabelDTO.ProductionDate" DisableToolbar="true" InputIcon="@Icons.Filled.EditCalendar" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudDatePicker  Variant="Variant.Outlined" PickerVariant="PickerVariant.Dialog" Label="@_localizer["Date d'expiration"]" @bind-Date="@taskLabelDTO.ExpirationDate" DisableToolbar="true" InputIcon="@Icons.Filled.EditCalendar" />
+                    </MudItem>*@
+                   
+                </MudGrid>
+            }
+            
+                    
+        </DialogContent>
+        <DialogActions>
+            @if(_global.IsMobileView)
+            {
+                     
+                @if (taskLabelDTO.Id != 0)
+                { 
+                    <MudButton Style="width:100%" DisableElevation Variant="Variant.Filled" OnClick="Cancel">@_localizer["Annuler"]</MudButton>
+ 
+                }
+                else
+                {
+                    <MudButton Style="width:100%" DisableElevation Variant="Variant.Filled" OnClick="Cancel">@_localizer["Annuler"]</MudButton>
+                    <MudButton Style="width:100%" DisableElevation Variant="Variant.Filled" ButtonType="ButtonType.Submit" Disabled="@(!Validated())" Color="Color.Success">@_localizer["Enregistrer"]</MudButton>
+                }
+
+            }
+            else
+            {
+                <MudButton Style="width:100%" DisableElevation Variant="Variant.Filled" OnClick="Cancel">@_localizer["Annuler"]</MudButton>
+                @if (taskLabelDTO.Id != 0)
+                {
+                    <MudButton Style="width:100%" DisableElevation Variant="Variant.Filled" ButtonType="ButtonType.Submit" Disabled="@(!Validated())" Color="Color.Secondary">@_localizer["Mettre a jour"]</MudButton>
+                }
+                else
+                {
+                    <MudButton Style="width:100%" DisableElevation Variant="Variant.Filled" ButtonType="ButtonType.Submit" Disabled="@(!Validated())" Color="Color.Success">@_localizer["Enregistrer"]</MudButton>
+                }
+            }
+            
+        </DialogActions>
+    </MudDialog>
+</EditForm>

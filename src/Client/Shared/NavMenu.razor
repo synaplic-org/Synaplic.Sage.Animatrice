@@ -1,0 +1,146 @@
+﻿
+@using System.Security.Claims
+@using System.Threading.Tasks
+@using Uni.Scan.Shared.Constants
+@using Uni.Scan.Shared.Constants.Integration
+
+
+<UserCard />
+<MudNavMenu Dense="true">
+	<MudNavLink Href="/Home" Icon="@Icons.Material.Outlined.Dashboard">
+		@Localizer["Accueil"]
+	</MudNavLink>
+	
+	<MudListSubheader Class="py-1 px-2 my-1">@Localizer["Logistics"]</MudListSubheader>
+	@if (_canViewInbound)
+	{
+
+		<MudNavLink Style="border-left:6px solid #d04512" Href="/Logistics/Inbound">
+			@Localizer[LogisticsProcessType.Inbound]
+
+		</MudNavLink>
+
+	}
+	@if (_canViewOutbound)
+	{
+		<MudNavLink Style="border-left:6px solid #009688" Href="/Logistics/Outbound">
+			@Localizer[LogisticsProcessType.Outbound]
+		</MudNavLink>
+	}
+	@if (_canViewInternal)
+	{
+		<MudNavLink Style="border-left:6px solid #9177be" Href="/Logistics/Internal">
+			@Localizer[LogisticsProcessType.Internal]
+		</MudNavLink>
+	}
+	@if (_canViewLogisticArea)
+	{
+		<MudNavLink Style="border-left:6px solid #87CEEB" Href="/LogisticArea">
+			@Localizer["Zone Logistique"]
+		</MudNavLink>
+	}
+	@if (_canViewLabels)
+	{
+		<MudNavLink Style="border-left:6px solid #d45ea5" Href="/Labels">
+			@Localizer["Étiquettes"]
+		</MudNavLink>
+	}
+	@if (_canViewAnomalies)
+	{
+		<MudNavLink Style="border-left:6px solid #FA8072" Href="/StockAnomaly">
+			@Localizer["Anomalies"]
+		</MudNavLink>
+	}
+	<MudListSubheader Class="py-1 px-2 my-1">@Localizer["Personal"]</MudListSubheader>
+	<MudNavLink Href="/account" Icon="@Icons.Material.Outlined.SupervisorAccount">
+		@Localizer["Mon compte"]
+	</MudNavLink>
+
+	@if (_canViewUsers || _canViewRoles)
+	{
+		<MudListSubheader Class="py-1 px-2 my-1">@Localizer["Administration"]</MudListSubheader>
+
+		@if (_canViewUsers)
+		{
+			<MudNavLink Href="/identity/users" Icon="@Icons.Material.Outlined.Person">
+				@Localizer["Utilisateurs"]
+			</MudNavLink>
+		}
+		@if (_canViewRoles)
+		{
+			<MudNavLink Href="/identity/roles" Icon="@Icons.Material.Outlined.Person">@Localizer["Rôles"]</MudNavLink>
+		}
+		@if(_canViewParametres)
+		{
+			<MudNavLink Href="/identity/Parametres" Icon="@Icons.Filled.Grain">@Localizer["Paramètres"]</MudNavLink>
+		}
+	}
+
+	@if (_canViewHangfire || _canViewSwagger)
+	{
+		<MudListSubheader Class="py-1 px-2 my-1">@Localizer["Infrastructure"]</MudListSubheader>
+		@if (_canViewHangfire)
+		{
+			<MudNavLink Href="/job-viewer" Icon="@Icons.Material.Outlined.Work">
+				@Localizer["Job Viewer"]
+			</MudNavLink>
+		}
+		@if (_canViewSwagger)
+		{
+			<MudNavLink Href="/swagger-viewer"  Icon="@Icons.Material.Outlined.LiveHelp">
+				@Localizer["Swagger"]
+			</MudNavLink>
+		}
+		@if (_canViewAuditTrails)
+		{
+			<MudNavLink Href="/audit-trails" Icon="@Icons.Material.Outlined.Security">
+				@Localizer["Changes Logs"]
+			</MudNavLink>
+		}
+
+	}
+    <MudListSubheader Class="py-1 px-2 my-1">@Localizer["Guide"]</MudListSubheader>
+    <MudNavLink Href="/Tutorials" Icon="@Icons.Filled.VideoLibrary">
+        @Localizer["Tutoriels"]
+    </MudNavLink>
+	<MudNavLink Href="/UserGuid" Icon="@Icons.Filled.MenuBook">
+        @Localizer["User Guide"]
+    </MudNavLink>
+
+</MudNavMenu>
+
+@code {
+	private ClaimsPrincipal _authenticationStateProviderUser;
+
+	private bool _canViewHangfire;
+	private bool _canViewSwagger;
+	private bool _canViewAuditTrails;
+	private bool _canViewRoles;
+	private bool _canViewUsers;
+	private bool _canViewParametres;
+	private bool _canViewInbound;
+	private bool _canViewOutbound;
+	private bool _canViewInternal;
+	private bool _canViewLabels;
+	private bool _canViewAnomalies;
+	private bool _canViewLogisticArea;
+	protected override async Task OnParametersSetAsync()
+	{
+		_authenticationStateProviderUser = await _stateProvider.GetAuthenticationStateProviderUserAsync();
+		_canViewHangfire = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Infrastructure.Jobs)).Succeeded;
+		_canViewSwagger = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Infrastructure.Swagger)).Succeeded;
+		_canViewAuditTrails = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.AuditTrails.View)).Succeeded;
+		_canViewRoles = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Roles.View)).Succeeded;
+		_canViewUsers = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Users.View)).Succeeded;
+		_canViewParametres = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Parametres.View)).Succeeded;
+		_canViewInbound = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Logistics.Inbound)).Succeeded;
+		_canViewOutbound = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Logistics.Outbound)).Succeeded;
+		_canViewInternal = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Logistics.Internal)).Succeeded;
+		_canViewLabels = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Labels.View)).Succeeded;
+		_canViewAnomalies = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.StockAnomalies.View)).Succeeded;
+		_canViewLogisticArea = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.LogisticArea.View)).Succeeded;
+
+
+	}
+
+}

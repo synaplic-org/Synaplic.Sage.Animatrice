@@ -1,0 +1,206 @@
+﻿@page "/Labels"
+@using System.Net.Http.Json
+@using Uni.Scan.Client.Infrastructure.ApiClients
+@using Uni.Scan.Transfer.DataModel
+@inject HttpClient httpClient
+@inject ISnackbar Snackbar
+
+
+<style>
+    tbody tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #fff;
+    }
+
+    .mud-table-cell {
+        font-weight: bold;
+        font-size: small;
+    }
+
+    .mud-table-sort-label {
+        font-weight: bolder;
+        font-size: medium;
+    }
+
+    .mud-radio-group {
+        padding-bottom: 8px;
+    }
+
+    th.mud-table-cell {
+        background: #e3edf9 !important;
+        color: black !important;
+        padding: 12px 12px !important;
+        border-bottom: #549df2 solid;
+    }
+</style>
+
+
+    <MudPaper Elevation="4" Class="mb-2 mx-1">
+        <MudToolBar Style="border-left: #549df2 solid 3px;border-right: #549df2 solid 3px">
+            <MudTextField @bind-Value="searchString" Immediate="true" FullWidth=false Placeholder="@Localizer["Recherche"]" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
+
+            <MudSpacer />
+
+            <MudButton DisableElevation Variant="Variant.Filled" Disabled="@_processing"
+                   OnClick="ProcessSomething" StartIcon="@Icons.Material.Filled.Refresh"
+                   IconColor="Color.Surface" Color="Color.Secondary">@Localizer["Rafraîchir"]</MudButton>
+
+        </MudToolBar>
+    </MudPaper>
+
+
+
+
+<MudPaper Class="mx-1" Elevation="3">
+   
+        <MudToolBar>
+            <MudRadioGroup onclick="@Filter" @bind-SelectedOption="LabelsType" Class="mx-3">
+                <MudRadio Option="2" Color="Color.Success" Size="Size.Small">@Localizer["Free"]</MudRadio>
+                <MudRadio Option="3" Color="Color.Tertiary" Size="Size.Small">@Localizer["Linked"]</MudRadio>
+                <MudRadio Option="1" Color="Color.Primary"  Size="Size.Small">@Localizer["Tout"]</MudRadio>
+            </MudRadioGroup>
+            <MudSpacer />
+
+            <MudTooltip Text="Créer">
+                @*<MudButton DisableElevation Variant="Variant.Filled"
+                           OnClick="(() => InvokeAddLabelModal())" StartIcon="@Icons.Filled.NoteAdd"
+                           IconColor="Color.Surface" Class="mx-1" Color="Color.Tertiary">@Localizer["Créer"]</MudButton>*@
+                
+                <MudButton DisableElevation Variant="Variant.Filled"
+                           OnClick="(async () =>await AddNewLabelAsync())" StartIcon="@Icons.Filled.NoteAdd"
+                           IconColor="Color.Surface" Class="mx-1" Color="Color.Tertiary">@Localizer["Créer"]</MudButton>
+            </MudTooltip>
+           
+        
+        </MudToolBar>
+    
+
+
+
+    <MudTable Items="@Elements" FixedHeader="true"
+              FixedFooter="true"
+              Height="calc(100vh - 250px)" Breakpoint="Breakpoint.None" Dense="@dense"
+              Loading="@_global.IsLoading" LoadingProgressColor="Color.Info" Hover="@hover"
+              ReadOnly="@ronly" Filter="new Func<LogisticTaskLabelDTO,bool>(Search)"
+              SortLabel="Sort By" Style="background-color: #e6f1f8;">
+
+        <HeaderContent>
+                <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x=>x.ProductId)">@Localizer["Produit"]</MudTableSortLabel></MudTh>
+                <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x=>x.ProductName)">@Localizer["Description"]</MudTableSortLabel></MudTh>
+                <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x=>x.IdentifiedStock)">@Localizer["Lot"]</MudTableSortLabel></MudTh>
+                <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x=>x.QuatityOnLabel)">@Localizer["Colisage"]</MudTableSortLabel></MudTh>
+                <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x=>x.PlanQuantity)">@Localizer["Quantité"]</MudTableSortLabel></MudTh>
+                <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x=>x.NbrEtiquettes)">@Localizer["Nombres Étiq."]</MudTableSortLabel></MudTh>
+                <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x=>x.Type)">@Localizer["Type"]</MudTableSortLabel></MudTh>
+                <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x=>x.CreatedOn)">@Localizer["Crée le"]</MudTableSortLabel></MudTh>
+                <MudTh></MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+           
+
+                <MudTd Style="text-align:center" DataLabel="ProductId"><MudHighlighter Text="@context.ProductId" HighlightedText="@searchString" /></MudTd>
+                <MudTd Style="text-align:center" DataLabel="ProductName"><MudHighlighter Text="@context.ProductName" HighlightedText="@searchString" /></MudTd>
+                <MudTd Style="text-align:center" DataLabel="IdentifiedStock"><MudHighlighter Text="@context.IdentifiedStock" HighlightedText="@searchString" /></MudTd>
+                <MudTd Style="text-align:center" DataLabel="QuatityOnLabel">@context.QuatityOnLabel.ToString("N2") @context.QuatityUnite</MudTd>
+                <MudTd Style="text-align:center" DataLabel="PlanQuantity">@context.PlanQuantity.ToString("N2")</MudTd>
+                <MudTd Style="text-align:center" DataLabel="NbrEtiquettes">@context.NbrEtiquettes</MudTd>
+                <MudTd Style="text-align:center" DataLabel="Type">
+                    @if(context.Type == LabelType.Linked)
+                    {
+                    <MudTooltip>
+                        <ChildContent>
+                            <MudBadge Color="Color.Warning" Overlap="true" Bordered="true">
+                                <MudChip Variant="Variant.Filled">
+                                    @context.Type
+                                </MudChip>
+                            </MudBadge>
+                        </ChildContent>
+                        <TooltipContent>
+                            <MudText Typo="Typo.body2">  <b>Produit : </b> @context.ProductId </MudText>
+                            <MudText Typo="Typo.body2">  <b>Lot : </b>  @context.IdentifiedStock</MudText>
+                            <MudText Typo="Typo.body2">  <b>Lot FR : </b>  @context.SupplierIdentifiedStock</MudText>
+                        </TooltipContent>
+                    </MudTooltip>
+                    }
+                    else
+                    {
+                       
+                    <MudTooltip>
+                        <ChildContent>
+                            <MudBadge Color="Color.Success" Overlap="true" Bordered="true">
+                                <MudChip Variant="Variant.Filled">
+                                    @context.Type
+                                </MudChip>
+                            </MudBadge>
+                        </ChildContent>
+                        <TooltipContent>
+                            <MudText Typo="Typo.body2">  <b>Produit : </b>  @context.ProductId </MudText>
+                            <MudText Typo="Typo.body2">  <b>Lot : </b>  @context.IdentifiedStock</MudText>
+                            <MudText Typo="Typo.body2">  <b>Lot FR : </b>  @context.SupplierIdentifiedStock</MudText>
+                        </TooltipContent>
+                    </MudTooltip>
+                    }
+             
+                </MudTd>
+                <MudTd Style="text-align:center" DataLabel="CreatedOn">@context.CreatedOn</MudTd>
+                <MudTd>
+                    @if (context.Type == LabelType.Linked)
+                    {
+                        <MudButtonGroup Color="Color.Transparent" Variant="Variant.Outlined">
+                            @if (_canPrintLabels)
+                            {
+                                <MudTooltip Text="Imprimer">
+                                    <MudIconButton Color="Color.Success" Size="Size.Small" Icon="@Icons.Material.Filled.Print" OnClick="@(() => PrintSingleLabel(@context.Id))" />
+                                </MudTooltip>
+                            }
+                            @if (_canDeleteLabels)
+                            {
+                                <MudTooltip Text="Supprimer">
+                                    <MudIconButton Color="Color.Error" Size="Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="@(() => Delete(@context.Id))" />
+                                </MudTooltip>
+                            }
+                        </MudButtonGroup>
+
+                    }
+                    else
+                    {
+                        <MudButtonGroup Color="Color.Transparent" Variant="Variant.Outlined">
+                            @if (_canPrintLabels)
+                            {
+                                <MudTooltip Text="Imprimer">
+                                    <MudIconButton Color="Color.Success" Size="Size.Small" Icon="@Icons.Material.Filled.Print" OnClick="@(() => PrintSingleLabel(@context.Id))" />
+                                </MudTooltip>
+                            }
+                            @if (_canEditLabels)
+                            {
+                                <MudTooltip Text="Modifier">
+                                    <MudIconButton Color="Color.Primary" Size="Size.Small" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => InvokeAddLabelModal(@context.Id))" />
+                                </MudTooltip>
+                            }
+                            @if (_canDeleteLabels)
+                            {
+                                <MudTooltip Text="Supprimer">
+                                    <MudIconButton Color="Color.Error" Size="Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="@(() => Delete(@context.Id))" />
+                                </MudTooltip>
+                            }
+                        </MudButtonGroup>
+                    }
+
+                </MudTd>
+            
+
+
+        </RowTemplate>
+        <PagerContent>
+                <TablePager />
+        </PagerContent>
+
+    </MudTable>
+</MudPaper>
+
+
+

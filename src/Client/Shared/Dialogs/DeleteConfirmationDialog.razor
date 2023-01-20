@@ -1,0 +1,49 @@
+﻿@namespace Uni.Scan.Client.Shared.Dialogs
+<style>
+    .mud-dialog-delete .mud-dialog-title {
+        background: #e5443a !important;
+        color: white !important;
+        padding: 6px 16px !important;
+        height: 40px !important;
+        font-size: 10px !important;
+    }
+</style>
+<MudDialog Class="mud-dialog-delete">
+    <TitleContent >
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Delete" Class="mr-3 mb-n1" />
+            @Localizer["Delete Confirmation"]
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText>@ContentText</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Style="width:100%" OnClick="Cancel">@Localizer["Anuller"]</MudButton>
+        <MudButton Style="width:100%" Color="Color.Error" Variant="Variant.Filled" OnClick="Submit">@Localizer["Confirmer"]</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public string ContentText { get; set; }
+
+    void Submit()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+    void Cancel() => MudDialog.Cancel();
+
+
+    public static async Task<bool> ShowDialogAsync(IDialogService dialogService, string deleteContent)
+    {
+        var parameters = new DialogParameters
+        {
+            { nameof(Client.Shared.Dialogs.DeleteConfirmationDialog.ContentText), deleteContent }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        var dialog = dialogService.Show<DeleteConfirmationDialog>("",parameters, options);
+        var result = await dialog.Result;
+        return !result.Cancelled;
+    }
+}

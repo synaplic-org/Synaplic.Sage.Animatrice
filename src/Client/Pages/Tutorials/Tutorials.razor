@@ -1,0 +1,85 @@
+﻿@page "/Tutorials"
+
+<MudPaper Elevation="4" Class="mb-2 mx-1">
+    <MudToolBar Style="border-left: #549df2 solid 3px;border-right: #549df2 solid 3px">
+        <MudTextField  @bind-Value="searchString" Immediate="true" FullWidth=false Placeholder="@Localizer["Recherche"]" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
+
+        <MudSpacer />
+
+        <MudButton DisableElevation Variant="Variant.Filled" OnClick="GetAnomalies" StartIcon="@Icons.Material.Filled.Refresh" IconColor="Color.Surface" Color="Color.Secondary">@Localizer["Rafraîchir"]</MudButton>
+
+    </MudToolBar>
+</MudPaper>
+<div>
+
+    <MudGrid Justify="Justify.FlexStart" Class="">
+        @foreach (var o in _listTutorial)
+        {
+            <MudItem xs="12" sm="3" md="4">
+                <MudCard>
+                    <MudCardMedia Image="@o.imagePath" Height="200" @onclick="() => PlayVideo(o.VideoPath)"/>
+                    <MudCardContent>
+                        <MudText Typo="Typo.h5">@o.Title</MudText>
+                        <MudText Typo="Typo.body2">@o.Desctiption </MudText>
+
+                    </MudCardContent>
+
+                </MudCard>
+            </MudItem>
+        }
+        
+    </MudGrid>
+
+</div>
+
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        _global.CurrentTitle = Localizer["TUTORIELS"].ToString().ToUpper();
+
+        _listTutorial = new List<VideoTutorial>()
+        {
+            new VideoTutorial()
+            {
+                Title = "Impression des etiquettes",
+                imagePath = "/icons/icon-512.png",
+                VideoPath = "",
+                Desctiption = "Element de test "
+            }
+        };
+
+        _FiltredListe = _listTutorial;
+    }
+    private void GetAnomalies()
+    {
+        if (string.IsNullOrEmpty(searchString))
+        {
+            _FiltredListe = _listTutorial;
+        }
+        else
+        {
+            _FiltredListe = _listTutorial.Where(o=> o.Title.Contains(searchString,StringComparison.OrdinalIgnoreCase) 
+                                                    || o.Desctiption.Contains(searchString,StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
+
+    private string searchString;
+    private List<VideoTutorial> _listTutorial = new();
+    private List<VideoTutorial> _FiltredListe = new();
+
+    private void PlayVideo(string s)
+    {
+         
+    }
+
+    private class VideoTutorial
+    {
+        public string Title { get; set; }
+        public string Desctiption { get; set; }
+        public string imagePath { get; set; }
+        public string VideoPath { get; set; }
+    }
+
+}

@@ -1,0 +1,273 @@
+﻿@using Uni.Scan.Transfer.DataModel
+@using Uni.Scan.Client.Pages.Stock
+@using Uni.Scan.Transfer.DataModel.LogisticTask
+@using Uni.Scan.Transfer.Requests.Label
+@using Mapster
+
+
+
+<MudDialog>
+    <TitleContent>
+
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.QrCode2" Class="mr-3 mb-n1" />
+            @Localizer["Impression Task :"] @Model?.OperationType  @Model?.Id
+        </MudText>
+
+    </TitleContent>
+    <DialogContent>
+        <MudGrid Spacing="1" Justify="Justify.FlexEnd">
+            <MudItem md="6" xl="6" sm="12">
+                <MudSelect Margin="Margin.Normal" T="string" @bind-Value="SelectedModelID" Label="@Localizer["Modèle d'impression : "]" Variant="Variant.Outlined">
+                    @foreach (var o in PrintTemplates)
+                    {
+                        <MudSelectItem Value="@o.ModelID">@o.ModelName</MudSelectItem>
+                    }
+
+                </MudSelect>
+            </MudItem>
+            <MudItem md="12">
+                <MudDivider />
+                <MudTable Items="SelectedLines"
+                          Context="LabelContext"
+                          Dense="true"
+                          Breakpoint="Breakpoint.SmAndDown"
+                          Bordered="false"
+                          LoadingProgressColor="Color.Info"
+                          Elevation="2"
+                          Hover="true" ReadOnly="false"
+                          Height="calc(100vh - 400px)"
+                          Style="overflow-y: auto;"
+                          Class="print-table"
+                          SortLabel="Trier par"
+                          CommitEditTooltip="Enregistrer"
+                          CancelEditTooltip="Annuler la modification"
+                          CommitEditIcon="@Icons.Outlined.Check"
+                          T="LogisticTaskLabelDTO2"
+                          IsEditRowSwitchingBlocked="@true"
+                          EditTrigger="TableEditTrigger.RowClick">
+                    <ColGroup>
+                        <col style="width: 15%;" />
+                        <col style="width: 30%;" />
+                        <col style="width: 15%;" />
+                        <col style="width: 15%;" />
+                        <col style="width: 10%;" />
+                        <col style="width: 15%;" />
+                    </ColGroup>
+                    <HeaderContent>
+                        <MudTh Style="text-align: center"> @Localizer["ID"]</MudTh>
+                        <MudTh Style="text-align: center"> @Localizer["Designation"]</MudTh>
+                        <MudTh Style="text-align: center"> @Localizer["Lot"]</MudTh>
+                        <MudTh Style="text-align: center"> @Localizer["Lot Fournisseur"]</MudTh>
+                        <MudTh Style="text-align: center">@Localizer["Date Exp"]</MudTh>
+                        <MudTh Style="text-align: center"> @Localizer["Quantité"]</MudTh>
+                    </HeaderContent>
+
+                    <RowTemplate>
+
+                        <MudTd Style="text-align: left"> @LabelContext.ProductId </MudTd>
+                        <MudTd Style="text-align: left"> @LabelContext.ProductName </MudTd>
+                        <MudTd Style="text-align: left"> @LabelContext.IdentifiedStock </MudTd>
+                        <MudTd Style="text-align: left">@LabelContext.SupplierIdentifiedStock </MudTd>
+                        <MudTd Style="text-align: center">@LabelContext.ExpirationDate.ToValueString() </MudTd>
+
+                        <MudTd Style="text-align: right">@LabelContext.PlanQuantity.ToValueString(_global.QteFormat) @LabelContext.QuatityUnite</MudTd>
+
+
+
+
+                    </RowTemplate>
+
+
+
+                </MudTable>
+
+            </MudItem>
+
+        </MudGrid>
+
+    </DialogContent>
+    <DialogActions>
+
+
+
+        <MudSpacer />
+        <MudButton Variant="Variant.Filled" Disabled="!IsValidated"
+                   StartIcon="@Icons.Material.Filled.Print"
+                   OnClick="PrintAsync" Color="Color.Primary">@Localizer["Imprimer"]</MudButton>
+
+    </DialogActions>
+</MudDialog>
+
+
+
+@code {
+
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; }
+
+    [Inject] private ILogisticLabelClient LogisticLabelClient { get; set; }
+    [Inject] private ILabelTemplateClient LabelTemplateClient { get; set; }
+    [Parameter] public LogisticTaskDTO2 Model { get; set; } = new();
+
+    private List<LabelTemplateDTO> PrintTemplates { get; set; } = new();
+    private List<LogisticTaskLabelDTO2> SelectedLines { get; set; } = new();
+
+    private string SelectedModelID { get; set; }
+    private bool IsValidated
+    {
+        get
+        {
+            if (_global.IsLoading) return false;
+            if (string.IsNullOrWhiteSpace(SelectedModelID)) return false;
+            if (string.IsNullOrWhiteSpace(Model.Id) || Model.Items.IsNullOrEmpty()) return false;
+            return true;
+
+        }
+    }
+
+
+
+    void Cancel() => MudDialog.Cancel();
+
+
+    public static async Task<bool> ShowDialogAsync(IDialogService dialogService, LogisticTaskDTO2 dto)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add(nameof(LogisticTaskPrintDialog.Model), dto);
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Large, FullWidth = true, DisableBackdropClick = true };
+
+        var dialog = dialogService.Show<LogisticTaskPrintDialog>("LABEL", parameters, options);
+        var result = await dialog.Result;
+        return !result.Cancelled;
+
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _global.IsLoading = true;
+
+        try
+        {
+            SelectedLines = Model.Items.SelectMany(o => o.Lables).ToList();
+            var response = await LabelTemplateClient.GetAllAsync();
+            if (response.Succeeded)
+            {
+                PrintTemplates = response.Data.Where(o => o.Type == PrintType.Task).ToList() ?? new List<LabelTemplateDTO>();
+            }
+            else
+            {
+                await _dialogService.ShowErrors(response.Messages);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            _snackBar.Add(Localizer["Vous êtes hors ligne !"]);
+        }
+        catch (Exception e)
+        {
+            await _dialogService.ShowErrors(e);
+        }
+
+        _global.IsLoading = false;
+    }
+
+
+    private async Task PrintAsync()
+    {
+        _global.IsLoading = true;
+
+        try
+        {
+            var currentUser = await _authenticationManager.CurrentUser();
+
+            var request = new LogisticPrintRequest()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ModelId = SelectedModelID,
+                    ModelType = LogisticPrintType.Task,
+                    ResponsibleName = Model.ResponsibleName,
+                    ResponsibleId = Model.ResponsibleId,
+                    SiteId = Model.SiteId,
+                    ProcessType = Model.ProcessType,
+                    RequestId = Model.RequestId,
+                    OperationType = Model.OperationType,
+                    PriorityCode = Model.PriorityCode,
+                    SiteName = Model.SiteName,
+                    TaskId = Model.Id,
+                    TaskIdBarcodeType = "128",
+                    Notes = Model.Notes
+                };
+            foreach (var o in SelectedLines)
+            {
+                var line = new LogisticPrintRequestLine()
+                    {
+                        Id = o.Id,
+                        TaskId = o.TaskId,
+                        ProductId = o.ProductId,
+                        SupplierIdentifiedStock = o.SupplierIdentifiedStock,
+                        ExpirationDate = o.ExpirationDate.ToValueString(),
+                        PlanQuantity = o.PlanQuantity.ToString(_global.QteFormat),
+                        NbrEtiquettes = o.NbrEtiquettes,
+                        ProductionDate = o.ProductionDate.ToValueString(),
+                        IdentifiedStock = o.IdentifiedStock,
+                        Tare = o.TareDecimal?.ToValueString(_global.QteFormat),
+                        ProductionOrdre = o.ProductionOrdre,
+                        QuatityOnLabel = o.QuatityOnLabel.ToValueString(_global.QteFormat, true),
+                        QuatityUnite = o.QuatityUnite,
+                        Comment = o.Comment,
+                        FabricationOrdre = o.FabricationOrdre,
+                        IsBatchManaged = Model.Items.FirstOrDefault(x => x.LineItemID == o.LineItemID)!.IsBatchManaged,
+                        ProductName = o.ProductName,
+                        SerialStock = o.SerialStock,
+                        TransferOrdre = o.TransferOrdre,
+                        UniqueIdBarcodeType = "QR",
+                        IdentifiedStockBarcodeType = "128",
+                        ProductIdBarcodeType = "128",
+                        UniqueId = o.UniqueId,
+                        RequestId = request.Id
+                    };
+                request.Labels.Add(line);
+            }
+
+
+            var myresponse = await LogisticLabelClient.GeneratePdf64FileAsync(request);
+            if (myresponse.Succeeded)
+            {
+                if (string.IsNullOrWhiteSpace(myresponse.Data))
+                {
+                    _snackBar.Add(Localizer["Erreur de chargement !"]);
+                }
+                else
+                {
+                    await PdfDialog.ShowDialogAsync(_dialogService, myresponse.Data);
+                    _global.IsLoading = false;
+                }
+            }
+            else
+            {
+                await _dialogService.ShowErrors(myresponse.Messages);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            _snackBar.Add(Localizer["Vous êtes hors ligne !"]);
+        }
+        catch (Exception e)
+        {
+            await _dialogService.ShowErrors(e);
+        }
+
+        _global.IsLoading = false;
+
+
+    }
+
+
+
+}

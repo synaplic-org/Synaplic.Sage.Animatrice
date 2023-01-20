@@ -1,0 +1,232 @@
+﻿@page "/StockAnomaly"
+@using System.Net.Http.Json
+@using Uni.Scan.Client.Infrastructure.ApiClients
+@using Uni.Scan.Transfer.DataModel
+@inject HttpClient httpClient
+@inject ISnackbar Snackbar
+
+
+<style>
+    tbody tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #fff;
+    }
+
+    .mud-table-cell {
+        font-weight: bold;
+        font-size: small;
+    }
+
+    .mud-table-sort-label {
+        font-weight: bolder;
+        font-size: medium;
+    }
+
+    .mud-radio-group {
+        padding-bottom: 8px;
+    }
+
+    th.mud-table-cell {
+        background: #e3edf9 !important;
+        color: black !important;
+        padding: 12px 12px !important;
+        border-bottom: #549df2 solid;
+    }
+</style>
+
+
+    <MudPaper Elevation="4" Class="mb-2 mx-1">
+        <MudToolBar Style="border-left: #549df2 solid 3px;border-right: #549df2 solid 3px">
+            <MudTextField @bind-Value="searchString" Immediate="true" FullWidth=false Placeholder="@Localizer["Recherche"]" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
+
+            <MudSpacer />
+
+            <MudButton DisableElevation Variant="Variant.Filled" OnClick="GetAnomalies" StartIcon="@Icons.Material.Filled.Refresh" IconColor="Color.Surface" Color="Color.Secondary">@Localizer["Rafraîchir"]</MudButton>
+
+        </MudToolBar>
+    </MudPaper>
+
+
+<div style="height:calc(100vh - 120px); overflow-y:auto">
+
+    <MudPaper Class="mx-1"  >
+
+      
+            <MudToolBar>
+             
+                <MudRadioGroup onclick="@Filter" @bind-SelectedOption="AnomaliesType" Class="mx-3">
+                    <MudRadio Option="2" Color="Color.Primary" Size="Size.Small">@Localizer["Nouveau"]</MudRadio>
+                    <MudRadio Option="3" Color="Color.Tertiary" Size="Size.Small">@Localizer["Traitée"]</MudRadio>
+                    <MudRadio Option="4" Color="Color.Error" Size="Size.Small">@Localizer["Rejeté"]</MudRadio>
+                    <MudRadio Option="5" Color="Color.Error" Size="Size.Small">@Localizer["Annulée"]</MudRadio>
+                    <MudRadio Option="1" Color="Color.Primary" Size="Size.Small">@Localizer["Tout"]</MudRadio>
+                </MudRadioGroup>
+                <MudSpacer />
+                <MudTooltip Text="Créer">
+                    <MudButton DisableElevation Variant="Variant.Filled"
+                           OnClick="(() => InvokeModal())" StartIcon="@Icons.Filled.NoteAdd"
+                           IconColor="Color.Surface" Class="mx-1" Color="Color.Tertiary">@Localizer["Créer"]</MudButton>
+                </MudTooltip>
+                
+
+            </MudToolBar>
+        
+        <MudTable Items="@Elements"
+                  FixedHeader="true"
+                  FixedFooter="true"
+                  Height="calc(100vh - 250px)" Dense="@dense" Hover="@hover" ReadOnly="@ronly" Loading="@_global.IsLoading" LoadingProgressColor="Color.Info" Breakpoint="Breakpoint.None" Filter="new Func<StockAnomalyDTO,bool>(Search)"
+                  SortLabel="Sort By" Style="background-color: #e6f1f8;">
+
+            <HeaderContent>
+                
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<StockAnomalyDTO, object>(x=>x.ProductID)">@Localizer["Produit"]</MudTableSortLabel></MudTh>
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<StockAnomalyDTO, object>(x=>x.ProductDescription)">@Localizer["Description"]</MudTableSortLabel></MudTh>
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<StockAnomalyDTO, object>(x=>x.LogisticsArea)">@Localizer["Zone Logistique"]</MudTableSortLabel></MudTh>
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<StockAnomalyDTO, object>(x=>x.IdentifiedStockID)"> @Localizer["ID Stock"]</MudTableSortLabel></MudTh>
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<StockAnomalyDTO, object>(x=>x.Quantity)"> @Localizer["Quantité"]</MudTableSortLabel></MudTh>
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<StockAnomalyDTO, object>(x=>x.AnomalyType)">@Localizer["Type"]</MudTableSortLabel></MudTh>
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<StockAnomalyDTO, object>(x=>x.AnomalyStatus)">@Localizer["Statut"]</MudTableSortLabel></MudTh>
+
+                    <MudTh></MudTh>
+                
+
+
+            </HeaderContent>
+
+            <RowTemplate>
+               
+                    <MudTd Style="text-align:center" DataLabel="ProductID"><MudHighlighter Text="@context.ProductID" HighlightedText="@searchString" /></MudTd>
+                    <MudTd Style="text-align:center" DataLabel="Description"><MudHighlighter Text="@context.ProductDescription" HighlightedText="@searchString" /></MudTd>
+                    <MudTd Style="text-align:center" DataLabel="LogisticArea"><MudHighlighter Text="@context.LogisticsArea" HighlightedText="@searchString" /></MudTd>
+                    <MudTd Style="text-align:center" DataLabel="IdentifiedStockID"><MudHighlighter Text="@context.IdentifiedStockID" HighlightedText="@searchString" /></MudTd>
+                    <MudTd Style="text-align:center" DataLabel="Quantity"><MudHighlighter Text="@context.Quantity.ToString("N2")" /></MudTd>
+                    <MudTd Style="text-align:center" DataLabel="AnomalyType">
+                       @if(context.AnomalyType == AnomalyType.Produit_Introuvable)
+                        {
+                        <MudText Style="font-weight: bold; font-size: small;"> @Localizer["Produit Introuvable"] </MudText>
+
+                        }
+                        else if (context.AnomalyType == AnomalyType.Produit_Trouve)
+                        {
+                        <MudText Style="font-weight: bold; font-size: small;"> @Localizer["Produit trouvé"] </MudText>
+                        }
+                        else if (context.AnomalyType == AnomalyType.Lot_Quantite_Erronee)
+                        {
+                        <MudText Style="font-weight: bold; font-size: small;"> @Localizer["Lot & Quantité Erronée"] </MudText>
+
+                        }
+                        else if (context.AnomalyType == AnomalyType.Lot_Erronee)
+                        {
+                        <MudText Style="font-weight: bold; font-size: small;"> @Localizer["Lot Erroné"] </MudText>
+
+                        }
+                        else if (context.AnomalyType == AnomalyType.Quantite_Erronee)
+                        {
+                        <MudText Style="font-weight: bold; font-size: small;"> @Localizer["Quantité Erronée"] </MudText>
+
+                        }
+                 
+                </MudTd>
+                    <MudTd Style="text-align:center" DataLabel="AnomalyType">
+                        @switch (context.AnomalyStatus)
+                        {
+
+                        case AnomalyStatus.Clôturée:
+                            <MudTooltip>
+                                <ChildContent>
+                                        <MudChip Color="Color.Primary">@Localizer["Clôturée"]</MudChip>
+                                </ChildContent>
+                                <TooltipContent >
+                                    <MudText Typo="Typo.body1"> <b>Raison : </b>   @context.AnomalyReason </MudText>
+                                </TooltipContent>
+                            </MudTooltip>
+                            
+                        break;
+
+                        case AnomalyStatus.Rejeté:
+                            <MudTooltip>
+                                <ChildContent>
+                                        <MudChip  Color="Color.Warning">@Localizer["Rejeté"]</MudChip>
+                                </ChildContent>
+                                <TooltipContent >
+
+                                    <MudText Typo="Typo.body1">  <b>Raison : </b>  @context.AnomalyReason </MudText>
+                                </TooltipContent>
+                            </MudTooltip>
+                        break;
+
+                        case AnomalyStatus.Annulée:
+                                <MudChip Style="background: #FA8072; color: white">@Localizer["Annulée"]</MudChip>
+                        break;
+
+                        default:
+                           
+                                    <MudChip Color="Color.Default">@Localizer["Nouveau"]</MudChip>
+                        break;
+                        }
+                    </MudTd>
+
+                    <MudTd Style="text-align:right">
+
+                        <MudButtonGroup Color="Color.Transparent" Variant="Variant.Outlined">
+                            @if (context.AnomalyStatus == AnomalyStatus.Clôturée || context.AnomalyStatus == AnomalyStatus.Rejeté || context.AnomalyStatus == AnomalyStatus.Annulée)
+                            {
+                                 @if (_canEditAnomalies)
+                                {
+                                <MudTooltip Text="Modifier">
+                                    <MudIconButton Size="Size.Small" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => InvokeModal(@context.Id))" />
+                                </MudTooltip>
+                                }
+                                @if (_canDeleteAnomalies)
+                                {
+                                <MudTooltip Text="Supprimer">
+                                    <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.Delete" OnClick="@(() => Delete(@context.Id))" />
+                                </MudTooltip>
+                                }
+                            }
+                            else if (context.AnomalyStatus == AnomalyStatus.Nouveau)
+                            {
+                                @if (_canValidateAnomalies)
+                                {
+                                    <MudTooltip Text="Clôturer">
+                                        <MudIconButton Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.Check" OnClick="@(() => InvokeJustifModal(@context.Id))" />
+                                    </MudTooltip>
+                                }
+                                @if (_canEditAnomalies)
+                                {
+                                    <MudTooltip Text="Modifier">
+                                        <MudIconButton Size="Size.Small" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => InvokeModal(@context.Id))" />
+                                    </MudTooltip>
+                                }
+                                @if (_canDeleteAnomalies)
+                                {
+                                    <MudTooltip Text="Supprimer">
+                                        <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.Delete" OnClick="@(() => Delete(@context.Id))" />
+                                    </MudTooltip>
+                                }
+                                @if (_canCancelAnomalies)
+                                {
+                                    <MudTooltip Text="Annuler">
+                                        <MudIconButton Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Cancel" OnClick="@(() => InvokeCancelModal(@context.Id))" />
+                                    </MudTooltip>
+                                }
+                            }
+                        </MudButtonGroup>
+                    </MudTd>
+                
+
+            </RowTemplate>
+
+            <PagerContent>
+                    <TablePager />
+            </PagerContent>
+
+
+
+        </MudTable>
+    </MudPaper>
+
+</div>

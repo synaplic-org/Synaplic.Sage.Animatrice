@@ -1,0 +1,51 @@
+﻿@namespace Uni.Scan.Client.Pages.Logistics
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Class="pa-2">
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.PersonOff"
+                       Color="Color.Error" 
+                       OnClick="() => SubmitAction(UnisignTask)">@Localizer["Libérer la tâche"]</MudButton>
+           
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh"
+                       Color="Color.Warning" Class="mt-1"
+                       OnClick="() => SubmitAction(ResetTask)">@Localizer["Annuler les modifications"]</MudButton>
+          
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.DoneAll" Style="height: 50px;"
+                       Color="Color.Secondary" Class="mt-3"
+                       OnClick="() => SubmitAction(SaveTask)">@Localizer["Envoyer vers SAP"]</MudButton>
+        </MudStack>
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" OnClick="Cancel">Annuler</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    public  const string UnisignTask = "UnassignTask";
+    public   const string ResetTask = "ResetTask";
+    public const string SaveTask = "SaveTask";
+
+    private void SubmitAction(string action)
+    {
+        MudDialog.Close(DialogResult.Ok(action));
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+    public static async Task<DialogResult> ShowDialogAsync(IDialogService dialogService)
+    {
+        var parameters = new DialogParameters();
+        var options = new DialogOptions
+        { CloseButton = true, FullWidth = true, CloseOnEscapeKey = true, DisableBackdropClick = true };
+        var dialog = await dialogService.ShowAsync<LogisticTaskDetailActionDialog>("Actions", parameters, options);
+        return await dialog.Result;
+    }
+
+}

@@ -1,0 +1,302 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components;
+using MudBlazor;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Uni.Scan.Client.Extensions;
+using Uni.Scan.Client.Infrastructure.ApiClients;
+using Uni.Scan.Client.Pages.Printing;
+using Uni.Scan.Shared.Constants.Permission;
+using Uni.Scan.Shared.Enums;
+using Uni.Scan.Transfer.DataModel;
+
+namespace Uni.Scan.Client.Pages.Stock
+{
+    public partial class StockAnomaly
+    {
+        [Inject] private IStockAnomalyClient _stockAnomalyClient { get; set; }
+        [Parameter] public StockAnomalyDTO anomalyDTO { get; set; } = new();
+        private string CurrentUserId { get; set; }
+
+        [Parameter] public int Id { get; set; }
+
+        private bool dense = false;
+        private bool hover = true;
+        private bool ronly = false;
+        private string searchString = "";
+        private List<StockAnomalyDTO> Elements = new();
+        private List<StockAnomalyDTO> FilterElements = new();
+
+        private StockAnomalyDTO _anomalyDTO = new();
+        private MudIconButton returnButton;
+
+        private ClaimsPrincipal _currentUser;
+        private bool _canViewAnomalies;
+        private bool _canCreateAnomalies;
+        private bool _canEditAnomalies;
+        private bool _canDeleteAnomalies;
+        private bool _canSearchAnomalies;
+        private bool _canValidateAnomalies;
+        private bool _canCancelAnomalies;
+        private bool _canRejectAnomalies;
+
+        public int AnomaliesType { get; set; } = 1;
+        public string AnomalyStat { get; set; }
+
+        protected override async Task OnParametersSetAsync()
+        {
+            //_global.CurrentTitle = Localizer["STOCK ANOMALIES"];
+        }
+
+        protected override async Task OnInitializedAsync()
+        {
+            _global.CurrentTitle = Localizer["STOCK ANOMALIES"];
+            _currentUser = await _authenticationManager.CurrentUser();
+            _canViewAnomalies = (await _authorizationService.AuthorizeAsync(_currentUser, Permissions.StockAnomalies.View)).Succeeded;
+            _canCreateAnomalies = (await _authorizationService.AuthorizeAsync(_currentUser, Permissions.StockAnomalies.Create)).Succeeded;
+            _canEditAnomalies = (await _authorizationService.AuthorizeAsync(_currentUser, Permissions.StockAnomalies.Edit)).Succeeded;
+            _canDeleteAnomalies = (await _authorizationService.AuthorizeAsync(_currentUser, Permissions.StockAnomalies.Delete)).Succeeded;
+            _canSearchAnomalies = (await _authorizationService.AuthorizeAsync(_currentUser, Permissions.StockAnomalies.Search)).Succeeded;
+            _canValidateAnomalies = (await _authorizationService.AuthorizeAsync(_currentUser, Permissions.StockAnomalies.Validate)).Succeeded;
+            _canRejectAnomalies = (await _authorizationService.AuthorizeAsync(_currentUser, Permissions.StockAnomalies.Reject)).Succeeded;
+            _canCancelAnomalies = (await _authorizationService.AuthorizeAsync(_currentUser, Permissions.StockAnomalies.Cancel)).Succeeded;
+            var state = await _stateProvider.GetAuthenticationStateAsync();
+            var user = state.User;
+            if (user == null) return;
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                CurrentUserId = user.GetUserId();
+            }
+            await GetAnomalies();
+        }
+
+        private async Task GetAnomalies()
+        {
+            SetLoading(true);
+            try
+            {
+                var response = await _stockAnomalyClient.GetAllAsync();
+                if (response.Succeeded)
+                {
+                    var list = response.Data.ToList();
+                    Elements = list.Where(i => i.DeclaredBy == CurrentUserId).ToList();
+                    FilterElements = Elements;
+                }
+                else
+                {
+                    await _dialogService.ShowErrors(response.Messages);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                _snackBar.Add(Localizer["Vous êtes hors ligne !"], Severity.Warning);
+            }
+            catch (Exception e)
+            {
+                await _dialogService.ShowErrors(e);
+            }
+
+            SetLoading(false);
+        }
+
+        private async Task Filter()
+        {
+            if (AnomaliesType == 1)
+            {
+                Elements = FilterElements;
+            }
+
+            if (AnomaliesType == 2)
+            {
+                Elements = FilterElements.Where(u => u.AnomalyStatus.Equals(AnomalyStatus.Nouveau)).Select(u => u).ToList();
+            }
+
+            if (AnomaliesType == 3)
+            {
+                Elements = FilterElements.Where(u => u.AnomalyStatus.Equals(AnomalyStatus.Clôturée)).Select(u => u).ToList();
+            }
+
+            if (AnomaliesType == 4)
+            {
+                Elements = FilterElements.Where(u => u.AnomalyStatus.Equals(AnomalyStatus.Rejeté)).Select(u => u).ToList();
+            }
+            if (AnomaliesType == 5)
+            {
+                Elements = FilterElements.Where(u => u.AnomalyStatus.Equals(AnomalyStatus.Annulée)).Select(u => u).ToList();
+            }
+        }
+
+        private async Task Delete(int id)
+        {
+            string deleteContent = Localizer["Supprimer "];
+            var parameters = new DialogParameters
+            {
+                { nameof(Client.Shared.Dialogs.DeleteConfirmationDialog.ContentText), string.Format(deleteContent, id) }
+            };
+            var options = new DialogOptions
+                { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+            var dialog =
+                _dialogService.Show<Client.Shared.Dialogs.DeleteConfirmationDialog>(Localizer["Supprimer"], parameters,
+                    options);
+            var result = await dialog.Result;
+            if (!result.Cancelled)
+            {
+                var response = await _stockAnomalyClient.DeleteAsync(id);
+                if (response.Succeeded)
+                {
+                    _snackBar.Add("Supprimé!", Severity.Success);
+                    await GetAnomalies();
+                }
+                else
+                {
+                    foreach (var message in response.Messages)
+                    {
+                        _snackBar.Add(message, Severity.Error);
+                    }
+
+                    await GetAnomalies();
+                }
+            }
+        }
+
+        private async Task InvokeModal(int id = 0)
+        {
+            var parameters = new DialogParameters();
+            if (id != 0)
+            {
+                _anomalyDTO = Elements.FirstOrDefault(c => c.Id == id);
+                if (_anomalyDTO != null)
+                {
+                    parameters.Add(nameof(StockAnomalyDialog.stockanomalyDTO), new StockAnomalyDTO
+                    {
+                        Id = _anomalyDTO.Id,
+                        ProductID = _anomalyDTO.ProductID,
+                        OwnerPartyID = _anomalyDTO.OwnerPartyID,
+                        ProductDescription = _anomalyDTO.ProductDescription,
+                        SiteID = _anomalyDTO.SiteID,
+                        IdentifiedStockID = _anomalyDTO.IdentifiedStockID,
+                        Quantity = _anomalyDTO.Quantity,
+                        QuantityUniteCode = _anomalyDTO.QuantityUniteCode,
+                        CompanyID = _anomalyDTO.CompanyID,
+                        CorrectedQuantity = _anomalyDTO.CorrectedQuantity,
+                        CorrectedIdentifiedStockID = _anomalyDTO.CorrectedIdentifiedStockID,
+                        DeclaredBy = _anomalyDTO.DeclaredBy,
+                        AnomalyReason = _anomalyDTO.AnomalyReason,
+                        AnomalyStatus = _anomalyDTO.AnomalyStatus,
+                        AnomalyType = _anomalyDTO.AnomalyType,
+                        ClosedBy = _anomalyDTO.ClosedBy,
+                        CloseOn = _anomalyDTO.CloseOn,
+                        InventoryRestrictedUseIndicator = _anomalyDTO.InventoryRestrictedUseIndicator,
+                        InventoryStockStatusCode = _anomalyDTO.InventoryStockStatusCode,
+                        IdentifiedStockType = _anomalyDTO.IdentifiedStockType,
+                        IdentifiedStockTypeCode = _anomalyDTO.IdentifiedStockTypeCode,
+                        LogisticsArea = _anomalyDTO.LogisticsArea,
+                        LogisticsAreaID = _anomalyDTO.LogisticsAreaID,
+                    });
+                }
+            }
+
+            if (!_global.IsMobileView)
+            {
+                var options = new DialogOptions
+                    { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+
+                var dialog =
+                    _dialogService.Show<StockAnomalyDialog>(id == 0 ? Localizer["Créer"] : Localizer["Modifier"],
+                        parameters, options);
+                var result = await dialog.Result;
+                if (!result.Cancelled)
+                {
+                    await Reset();
+                }
+            }
+            else
+            {
+                var options = new DialogOptions
+                    { FullScreen = true, FullWidth = true, DisableBackdropClick = true, NoHeader = true, };
+
+                var dialog =
+                    _dialogService.Show<StockAnomalyDialog>(id == 0 ? Localizer["Créer"] : Localizer["Modifier"],
+                        parameters, options);
+                var result = await dialog.Result;
+                if (!result.Cancelled)
+                {
+                    await Reset();
+                }
+            }
+        }
+
+        private async Task Reset()
+        {
+            _anomalyDTO = new StockAnomalyDTO();
+            await GetAnomalies();
+        }
+
+        private bool Search(StockAnomalyDTO anomaly)
+        {
+            if (string.IsNullOrWhiteSpace(searchString)) return true;
+            if (anomaly.ProductID?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true)
+            {
+                return true;
+            }
+
+            if (anomaly.LogisticsArea?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true)
+            {
+                return true;
+            }
+            if (anomaly.ProductDescription?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true)
+            {
+                return true;
+            }
+            return anomaly.ProductID?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true;
+        }
+
+        private async Task BackToParent()
+        {
+            SetLoading(true);
+            _navigationManager.NavigateTo($"/Home");
+            await Task.Delay(1);
+            SetLoading(false);
+        }
+
+        private void SetLoading(bool val)
+        {
+            _global.IsLoading = val;
+            StateHasChanged();
+        }
+
+        private async Task InvokeJustifModal(int id)
+        {
+            var parameters = new DialogParameters();
+            AnomalyStat = "Justif";
+            parameters.Add(nameof(StockAnomalyJustifDialog.AnomalyStat), AnomalyStat);
+            parameters.Add(nameof(StockAnomalyJustifDialog.Id), id);
+            var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true, DisableBackdropClick = true };
+            var dialog = _dialogService.Show<StockAnomalyJustifDialog>(Localizer["Justification"], parameters, options);
+            var result = await dialog.Result;
+            if (!result.Cancelled)
+            {
+                await Reset();
+            }
+        }
+
+        private async Task InvokeCancelModal(int id)
+        {
+            var parameters = new DialogParameters();
+            AnomalyStat = "Cancel";
+            parameters.Add(nameof(StockAnomalyJustifDialog.AnomalyStat), AnomalyStat);
+            parameters.Add(nameof(StockAnomalyJustifDialog.Id), id);
+            var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true, DisableBackdropClick = true };
+            var dialog = _dialogService.Show<StockAnomalyJustifDialog>(Localizer["Annulation"], parameters, options);
+            var result = await dialog.Result;
+            if (!result.Cancelled)
+            {
+                await Reset();
+            }
+        }
+    }
+}

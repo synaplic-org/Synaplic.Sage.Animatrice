@@ -1,0 +1,365 @@
+﻿@page "/"
+@page "/Home"
+@using System.Security.Claims
+@using System.Threading
+@using Uni.Scan.Client.Infrastructure.ApiClients;
+@using Uni.Scan.Client.Infrastructure.Managers.Logistics
+@using Uni.Scan.Transfer.DataModel
+@using Uni.Scan.Transfer.Requests.Label;
+@using Timer = System.Timers.Timer
+
+<style>
+
+    .HomeButton {
+        height: calc(100% - 0px);
+        padding: 4px
+    }
+
+    .HomeButtonCard {
+        width: 100%;
+        height: 100%;
+        border: 1px solid ;
+        display: grid;
+        justify-content: center;
+        align-items: center;
+        border-end-end-radius: 25px;
+        border-start-start-radius: 25px;
+    }
+
+</style>
+@if (_global.IsMobileView)
+{
+    <table style="height:calc(100vh - 116px);width:calc(100% - 6px);overflow: auto;">
+        @if (!_IsProduction)
+        {
+
+      
+        <!-- INBOUND -->
+        <tr style="height: 16%;max-height: 16%">
+            <td colspan="1" style="width: 50%">
+
+
+                <MudButton FullWidth="true" OnClick="@(() =>  _navigationManager.NavigateTo($"/Mobile/Logistics/{LogisticsProcessType.Inbound}"))" Class="HomeButton">
+                    <MudCard Elevation="3" Class="HomeButtonCard" Style="border-left:10px solid ;border-color: #38679e">
+                      
+                        <div class="fs4" aria-hidden="true" data-icon="&#xe24b;"></div>
+                  
+                        <MudText Typo="Typo.h6">@Localizer[LogisticsProcessType.Inbound]</MudText>
+                     
+                    </MudCard>
+                </MudButton>
+            </td>
+            <td colspan="1" style="width: 50%">
+
+
+                <MudButton FullWidth="true" OnClick="@(() =>  _navigationManager.NavigateTo($"/Mobile/Logistics/{LogisticsProcessType.Outbound}"))" Class="HomeButton">
+                    <MudCard Elevation="3" Class="HomeButtonCard" Style="border-left:10px solid;border-color:#f4805d">
+                      
+                        <div class="fs4" aria-hidden="true" data-icon="&#xe24a;"></div>
+                  
+                        <MudText Typo="Typo.h5">@Localizer[LogisticsProcessType.Outbound]</MudText>
+                     
+                    </MudCard>
+                </MudButton>
+            </td>
+        </tr>
+
+        <!-- INTERNAL -->
+        <tr style="height: 16%;max-height: 16%">
+            <td colspan="1" style="width: 50%">
+
+                <MudButton FullWidth="true" OnClick="@(() =>  _navigationManager.NavigateTo($"/Mobile/Logistics/{LogisticsProcessType.Internal}"))" Class="HomeButton">
+                    <MudCard Elevation="3" Class="HomeButtonCard" Style="border-left:10px solid;border-color: #efbd66">
+                        
+                        <div class="fs4" aria-hidden="true" data-icon="&#xe16d;"></div>
+                            
+                        <MudText Typo="Typo.h5">@Localizer[LogisticsProcessType.Internal]</MudText>
+                             
+                    </MudCard>
+                </MudButton>
+
+            </td>
+            
+            <!-- PRODUCTION -->
+            <td colspan="1">
+
+                <MudButton FullWidth="true" Disabled="true" OnClick="@(() =>  _navigationManager.NavigateTo($"/Production"))" Class="HomeButton">
+                    <MudCard Elevation="3" Class="HomeButtonCard" Style="border-left:10px solid;border-color: #607d8b;background: #b4b4b4;">
+                        <div class="fs4" aria-hidden="true" data-icon="&#xe078;"></div>
+                            
+                        <MudText Typo="Typo.h5">Production</MudText>
+                    </MudCard>
+                </MudButton>
+
+            </td>
+            
+        </tr>
+        }
+      
+        <tr style="height: 16%; max-height: 16%">
+
+            <!-- STOCK -->
+            <td colspan="1" style="width: 50%">
+                <MudButton FullWidth="true" Disabled="false" OnClick="@(() => _navigationManager.NavigateTo($"/StockOverview"))" Class="HomeButton">
+                    <MudCard Elevation="3" Class="HomeButtonCard" Style="border-left: 10px solid; border-color: #638560">
+
+                        <div class="fs4" aria-hidden="true" data-icon="&#xe11d;"></div>
+                        <MudText Typo="Typo.h5">Stock</MudText>
+                    </MudCard>
+                </MudButton>
+
+            </td>
+            <td colspan="1" style="width: 50%">
+                
+                <MudButton FullWidth="true" Disabled="false" OnClick="@(() =>  _navigationManager.NavigateTo($"/Inventory"))" Class="HomeButton">
+                    <MudCard Elevation="3" Class="HomeButtonCard" Style="border-left:10px solid;border-color: #43c5e6">
+                        
+                        <div class="fs4" aria-hidden="true" data-icon="&#xe15d;"></div>
+                        <MudText Typo="Typo.h5">Inventory</MudText>
+                    </MudCard>
+                </MudButton>
+               
+            </td>
+            
+        </tr>
+
+       
+        <tr style="height: 16%;max-height: 16%">
+           
+
+        <!-- ANOMALIES -->
+        <td colspan="1">
+
+
+                <MudButton FullWidth="true" OnClick="@(() =>  _navigationManager.NavigateTo($"/Mobile/StockAnomaly"))" Class="HomeButton">
+                    <MudCard Elevation="3" Class="HomeButtonCard" Style="border-left:10px solid;border-color: #f75441">
+
+                      
+                    <div class="fs4" aria-hidden="true" data-icon="&#xe079;"></div>
+                           
+                    <MudText Typo="Typo.h5">Anomalies</MudText>
+                            
+                </MudCard>
+            </MudButton>
+
+        </td>
+        <!-- LABELS -->
+        <td colspan="1" style="width: 50%">
+
+            <MudButton FullWidth="true" Disabled="false" OnClick="@(() =>  _navigationManager.NavigateTo($"/Mobile/Labels"))" Class="HomeButton">
+                <MudCard Elevation="3" Class="HomeButtonCard" Style="border-left:10px solid;border-color: #a55ecd">
+
+                    <div class="fs4" aria-hidden="true" data-icon="&#xe08d;"></div>
+                    <MudText Typo="Typo.h5">Labels</MudText>
+
+                </MudCard>
+            </MudButton>
+
+        </td>
+        </tr>
+          
+     
+       
+
+    </table>
+
+
+    <!-- FOOTER BAR -->
+    <div style="margin-bottom: 53px"></div>
+    <MudAppBar Bottom="true" Fixed="true" Color="Color.Primary" Elevation="1" Class="mobile-footer-barr"  >
+
+        <MudIconButton Disabled="_global.IsLoading" Icon="@Icons.Material.Filled.Settings" Style="background-color: #456688;color: white" Edge="Edge.Start"
+                   OnClick="ShowSettings" />
+
+
+        @if (_global.IsLoading)
+        {
+            <MudProgressLinear Color="Color.Tertiary" Indeterminate="true" Size="Size.Medium" Class="mx-3" />
+        }
+
+
+        <MudSpacer />
+        <MudIconButton Disabled="_global.IsLoading" Icon="@Icons.Material.Filled.Sync" Class="mx-1" Style="background-color: #1E88E5;color: white" Edge="Edge.Start"
+                   OnClick="SyncAllData">
+        </MudIconButton>
+
+        <MudMenu Disabled="_global.IsLoading" Direction="Direction.Left" OffsetX="true" Dense="true" Class="mt-1 ml-4">
+            <ActivatorContent>
+                <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Dark" Edge="Edge.End" Style="border: 2px solid #8a99a9" />
+            </ActivatorContent>
+            <ChildContent>
+
+              
+                <MudListItem Disabled="_global.IsLoading" Text="@Localizer["About"]" Icon="@Icons.Material.Filled.Info"
+                         OnClick="ShowAbout" />
+
+
+            </ChildContent>
+        </MudMenu>
+    </MudAppBar>
+}
+else
+{
+
+    <table style="height:calc(100vh - 116px);width:calc(100% - 6px);overflow: scroll;">
+
+
+        <tr>
+            <td>
+                <MudGrid Spacing="1" Justify="Justify.Center">
+                     <MudStack>
+
+                    <MudText Typo="Typo.h1">
+                            UNISCAN @_global.CurrentVersion
+                    </MudText>
+                    <MudButton Disabled="_global.IsLoading" Icon="@Icons.Material.Filled.Sync" Style="background-color: #1E88E5;color: white" OnClick="SyncAllData">
+                        @Localizer["Sync"]
+                    </MudButton>
+                        
+                    @if (_global.IsLoading)
+                    {
+                        <MudProgressLinear Color="Color.Tertiary" Indeterminate="true" Size="Size.Medium" />
+                    }
+                     </MudStack>
+                </MudGrid>
+            </td>
+        </tr>
+    </table>
+
+}
+
+@code {
+
+
+    private ClaimsPrincipal _authenticationStateProviderUser;
+
+    [Inject] private ISyncClient _SyncClient { get; set; }
+
+    bool _canInbound, _canOutbound, _canProduction, _canInternal, _canInventory;
+    protected override async Task OnParametersSetAsync()
+    {
+        _authenticationStateProviderUser = await _stateProvider.GetAuthenticationStateProviderUserAsync();
+        _canInbound = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Logistics.Inbound)).Succeeded;
+        _canOutbound = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Logistics.Outbound)).Succeeded;
+        _canProduction = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Logistics.Production)).Succeeded;
+        _canInternal = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Logistics.Internal)).Succeeded;
+        _canInventory = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Logistics.Inventory)).Succeeded;
+        _canShowHome = (await _authorizationService.AuthorizeAsync(_authenticationStateProviderUser, Permissions.Logistics.Home)).Succeeded;
+
+        //if (!_canShowHome)
+        //{
+        //	_navigationManager.NavigateTo($"/identity/users");
+        //}
+    }
+    protected override void OnInitialized()
+    {
+        _global.CurrentTitle = "UNISCAN " + _global.CurrentVersion;
+        base.OnInitialized();
+        SetLoading(false);
+    }
+    private void ManagePermissions()
+    {
+        _navigationManager.NavigateTo($"/Inbound");
+    }
+
+
+
+
+    private bool _canShowHome;
+    private System.Threading.Timer otimer;
+    private string ExecutingJobID = null;
+    private bool _IsProduction = false;
+
+    private async Task SyncAllData()
+    {
+        SetLoading(true);
+
+   
+        StateHasChanged();
+        try
+        {
+         var response =    await _SyncClient.StartSyncAsync();
+            if (response.Succeeded)
+            {
+                errorCount = 0;
+                ExecutingJobID = response.Data;
+              
+                 otimer = new System.Threading.Timer(CheckJobState,null,0,5000);
+
+              
+
+                //_snackBar.Add(Localizer["La synchronisation est en cours "],Severity.Success);
+                //_snackBar.Add(Localizer["Veuillez attendre quelques secondes !"],Severity.Info);
+            }
+            else
+            {
+                await _dialogService.ShowErrors(response.Messages);
+            }
+        }
+        catch (Exception e)
+        {
+            await _dialogService.ShowErrors(e);
+        }
+       
+       // SetLoading(false);
+    }
+
+    private int errorCount = 0;
+    private async void CheckJobState(object state)
+    {
+        try
+        {
+             
+            var response =    await _SyncClient.GetJobStateAsync(ExecutingJobID);
+            if (response.Succeeded)
+            {
+
+                if (response.Data.ToLower() == "succeeded" || (response.Data.ToLower() == "failed"))
+                {
+                    _snackBar.Add(response.Data, Severity.Info);
+                    otimer.Change(Timeout.Infinite, Timeout.Infinite);
+                    SetLoading(false);
+                }
+            }
+            else
+            {
+                errorCount = 99;
+    // await _dialogService.ShowErrors(response.Messages);
+            }
+        }
+        catch (Exception e)
+        {
+            errorCount++;
+            //await _dialogService.ShowErrors(e);
+        }
+        if (errorCount > 3)
+        {
+            otimer.Change(Timeout.Infinite, Timeout.Infinite);
+            SetLoading(false);
+        }
+    }
+
+   
+
+    private void SetLoading(bool val)
+    {
+        _global.IsLoading = val;
+        StateHasChanged();
+    }
+
+
+    private void ShowSettings()
+    {
+        _navigationManager.NavigateTo($"/account");
+    }
+
+    
+
+    private void ShowAbout()
+    {
+
+    }
+
+  
+
+}

@@ -1,0 +1,211 @@
+﻿<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:glob="http://sap.com/xi/SAPGlobal20/Global">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <glob:SiteLogisticsTaskBundleMaintainRequest_sync_V1>
+            <BasicMessageHeader>
+                <ID>?</ID>
+            </BasicMessageHeader>
+            <!--Zero or more repetitions:-->
+            <SiteLogisticsTask>
+                <!--Optional:-->
+                <SiteLogisticTaskID>?</SiteLogisticTaskID>
+                <!--Optional:-->
+                <SiteLogisticTaskUUID>?</SiteLogisticTaskUUID>
+                <!--Zero or more repetitions:-->
+                <ReferenceObject>
+                    <!--Optional:-->
+                    <ReferenceObjectUUID>?</ReferenceObjectUUID>
+                    <!--Zero or more repetitions:-->
+                    <OperationActivity>
+                        <!--Optional:-->
+                        <OperationActivityUUID>?</OperationActivityUUID>
+                        <!--Zero or more repetitions:-->
+                        <MaterialOutput>
+                            <!--Optional:-->
+                            <MaterialOutputUUID>?</MaterialOutputUUID>
+                            <!--Optional:-->
+                            <ProductID>?</ProductID>
+                            <!--Optional:-->
+                            <SourceLogisticsAreaIDPostSplit>?</SourceLogisticsAreaIDPostSplit>
+                            <!--Optional:-->
+                            <TargetLogisticsAreaID>?</TargetLogisticsAreaID>
+                            <!--Optional:-->
+                            <ActualQuantity unitCode="?">?</ActualQuantity>
+                            <!--Optional:-->
+                            <IdentifiedStockID>?</IdentifiedStockID>
+                            <!--Optional:-->
+                            <ProductRequirementSpecificationID>?</ProductRequirementSpecificationID>
+                            <!--Optional:-->
+                            <InventoryRestrictedIndicator>?</InventoryRestrictedIndicator>
+                            <!--Optional:-->
+                            <LogisticsDeviationReasonCode>?</LogisticsDeviationReasonCode>
+                            <!--Optional:-->
+                            <SplitIndicator>?</SplitIndicator>
+
+
+                            <!--Optional:-->
+                            <SerialNumber>
+                                <SerialID>?</SerialID>
+                                <SerialID>?</SerialID>
+                                <SerialID>?</SerialID>
+                            </SerialNumber>
+
+                        </MaterialOutput>
+                        <MaterialOutput>
+                            <!--Optional:-->
+                            <MaterialOutputUUID>?</MaterialOutputUUID>
+                            <!--Optional:-->
+                            <ProductID>?</ProductID>
+                            <!--Optional:-->
+                            <SourceLogisticsAreaIDPostSplit>?</SourceLogisticsAreaIDPostSplit>
+                            <!--Optional:-->
+                            <TargetLogisticsAreaID>?</TargetLogisticsAreaID>
+                            <!--Optional:-->
+                            <ActualQuantity unitCode="?">?</ActualQuantity>
+                            <!--Optional:-->
+                            <IdentifiedStockID>?</IdentifiedStockID>
+                            <!--Optional:-->
+                            <ProductRequirementSpecificationID>?</ProductRequirementSpecificationID>
+                            <!--Optional:-->
+                            <InventoryRestrictedIndicator>?</InventoryRestrictedIndicator>
+                            <!--Optional:-->
+                            <LogisticsDeviationReasonCode>?</LogisticsDeviationReasonCode>
+                            <!--Optional:-->
+                            <SplitIndicator>?</SplitIndicator>
+
+
+                            <!--Optional:-->
+                            <SerialNumber>
+                                <SerialID>?</SerialID>
+                                <SerialID>?</SerialID>
+                                <SerialID>?</SerialID>
+                            </SerialNumber>
+
+                        </MaterialOutput>
+                    </OperationActivity>
+                </ReferenceObject>
+            </SiteLogisticsTask>
+            <SiteLogisticsTask>
+                <!--Optional:-->
+                <SiteLogisticTaskID>?</SiteLogisticTaskID>
+                <!--Optional:-->
+                <SiteLogisticTaskUUID>?</SiteLogisticTaskUUID>
+                <!--Zero or more repetitions:-->
+                <ReferenceObject>
+                    <!--Optional:-->
+                    <ReferenceObjectUUID>?</ReferenceObjectUUID>
+                    <!--Zero or more repetitions:-->
+                    <OperationActivity>
+                        <!--Optional:-->
+                        <OperationActivityUUID>?</OperationActivityUUID>
+                        <!--Zero or more repetitions:-->
+                        <MaterialOutput>
+                            <!--Optional:-->
+                            <MaterialOutputUUID>?</MaterialOutputUUID>
+                            <!--Optional:-->
+                            <ProductID>?</ProductID>
+                            <!--Optional:-->
+                            <SourceLogisticsAreaIDPostSplit>?</SourceLogisticsAreaIDPostSplit>
+                            <!--Optional:-->
+                            <TargetLogisticsAreaID>?</TargetLogisticsAreaID>
+                            <!--Optional:-->
+                            <ActualQuantity unitCode="?">?</ActualQuantity>
+                            <!--Optional:-->
+                            <IdentifiedStockID>?</IdentifiedStockID>
+                            <!--Optional:-->
+                            <ProductRequirementSpecificationID>?</ProductRequirementSpecificationID>
+                            <!--Optional:-->
+                            <InventoryRestrictedIndicator>?</InventoryRestrictedIndicator>
+                            <!--Optional:-->
+                            <LogisticsDeviationReasonCode>?</LogisticsDeviationReasonCode>
+                            <!--Optional:-->
+                            <SplitIndicator>?</SplitIndicator>
+
+
+                            <!--Optional:-->
+                            <SerialNumber>
+                                <SerialID>?</SerialID>
+                                <SerialID>?</SerialID>
+                                <SerialID>?</SerialID>
+                            </SerialNumber>
+
+                        </MaterialOutput>
+                        <MaterialOutput>
+                            <!--Optional:-->
+                            <MaterialOutputUUID>?</MaterialOutputUUID>
+                            <!--Optional:-->
+                            <ProductID>?</ProductID>
+                            <!--Optional:-->
+                            <SourceLogisticsAreaIDPostSplit>?</SourceLogisticsAreaIDPostSplit>
+                            <!--Optional:-->
+                            <TargetLogisticsAreaID>?</TargetLogisticsAreaID>
+                            <!--Optional:-->
+                            <ActualQuantity unitCode="?">?</ActualQuantity>
+                            <!--Optional:-->
+                            <IdentifiedStockID>?</IdentifiedStockID>
+                            <!--Optional:-->
+                            <ProductRequirementSpecificationID>?</ProductRequirementSpecificationID>
+                            <!--Optional:-->
+                            <InventoryRestrictedIndicator>?</InventoryRestrictedIndicator>
+                            <!--Optional:-->
+                            <LogisticsDeviationReasonCode>?</LogisticsDeviationReasonCode>
+                            <!--Optional:-->
+                            <SplitIndicator>?</SplitIndicator>
+
+
+                            <!--Optional:-->
+                            <SerialNumber>
+                                <SerialID>?</SerialID>
+                                <SerialID>?</SerialID>
+                                <SerialID>?</SerialID>
+                            </SerialNumber>
+
+                        </MaterialOutput>
+                    </OperationActivity>
+                </ReferenceObject>
+            </SiteLogisticsTask>
+        </glob:SiteLogisticsTaskBundleMaintainRequest_sync_V1>
+    </soapenv:Body>
+</soapenv:Envelope>
+
+
+<soap-env:Envelope xmlns:soap-env="http://schemas.xmlsoap.org/soap/envelope/">
+<soap-env:Header/>
+<soap-env:Body>
+    <soap-env:Fault>
+        <faultcode>soap-env:Client</faultcode>
+        <faultstring xml:lang="en">Application exception occurred!</faultstring>
+        <detail>
+            <n0:StandardFaultMessage xmlns:n0="http://sap.com/xi/AP/Common/Global"
+                                     xmlns:prx="urn:sap.com:proxy:HD0:/1SAI/TAS5118194EC91140F9E030:804">
+                <standard>
+                    <faultText>Action failed</faultText>
+                    <faultUrl>AP_LEX201</faultUrl>
+                    <faultDetail>
+                        <severity>E</severity>
+                        <text>Action not permitted; product quantity is read-only</text>
+                        <id>RC_AUTOID_TN026</id>
+                    </faultDetail>
+                    <faultDetail>
+                        <severity>E</severity>
+                        <text>Identified stock TEST not valid</text>
+                        <id>AP_LEX331</id>
+                    </faultDetail>
+                    <faultDetail>
+                        <severity>E</severity>
+                        <text>Value for identified stock missing</text>
+                        <id>AP_LEX357</id>
+                    </faultDetail>
+                    <faultDetail>
+                        <severity>E</severity>
+                        <text>Action failed</text>
+                        <id>AP_LEX201</id>
+                    </faultDetail>
+                </standard>
+                <addition/>
+            </n0:StandardFaultMessage>
+        </detail>
+    </soap-env:Fault>
+</soap-env:Body>
+</soap-env:Envelope>

@@ -1,0 +1,310 @@
+﻿@page "/Logistics/{ProcessType}/Labels/{TaskObjectID}"
+@using Uni.Scan.Transfer.DataModel.LogisticTask
+@using Uni.Scan.Transfer.DataModel
+
+
+<style>
+
+    tbody tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #fff;
+    }
+
+    .mud-table-cell {
+        font-weight: bold;
+        font-size: small;
+        border-top: #2b78d1 solid 1px;
+        border-bottom: 0px;
+    }
+
+
+
+    .mud-badge-unsigned {
+        background-color: #ebcf7c;
+        color: white;
+    }
+
+
+
+    th.mud-table-cell {
+        background: #e3edf9 !important;
+        color: black !important;
+        padding: 12px 12px !important;
+        border: 0px;
+        font-weight: bold !important;
+        font-size: small;
+        border-bottom: #2b78d1 solid 1px !important;
+    }
+
+
+
+    .mud-table-container {
+        border: solid 1px #c6dbc9;
+    }
+
+    .lable-table {
+        margin-bottom: 15px;
+        margin-left: 30px;
+        margin-right: 5px;
+    }
+
+    .print-table .mud-table-toolbar {
+        background: #edf4ff;
+        border-bottom: 2px solid #6c9cf7;
+        height: 42px !important;
+    }
+
+    .lable-header {
+    }
+
+    .lable-row {
+    }
+</style>
+
+<MudPaper Elevation="4" Class="mb-2 mx-1">
+    <MudToolBar Class="uni-search-bar">
+        <MudTextField @bind-Value="_searchString" Immediate="true" FullWidth=false Placeholder="@Localizer["Recherche"]"
+                      Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search"
+                      IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
+
+        <MudSpacer />
+        <MudTooltip Text="Imprimer la tache">
+            <MudIconButton Icon="@Icons.Filled.Print" Variant="Variant.Outlined" Class="mx-2" Color="Color.Primary" OnClick="@(() => PrintTask(_currentTask))" />
+        </MudTooltip>
+        <MudButton Variant="Variant.Filled"
+                   OnClick="LoadData" StartIcon="@Icons.Material.Filled.Refresh"
+                   IconColor="Color.Surface" Color="Color.Secondary">@Localizer["Rafraîchir"]</MudButton>
+
+    </MudToolBar>
+</MudPaper>
+
+@*<HeroTitle Title="@Localizer[ProcessType]" />
+*@
+<MudTable Hover="false" Elevation="3" Class="mx-1"
+          Items="_logisticTaskistLines"
+          Dense="true"
+          Striped="false"
+          FixedHeader="true"
+          Bordered="true"
+          Height="calc(100vh - 133px)"
+          Style="  overflow-y:auto;"
+          T="LogisticTaskItemDTO2"
+          @bind-SelectedItem="_selectedTaskItem"
+          Loading="@_global.IsLoading" LoadingProgressColor="Color.Info"
+          Filter="new Func<LogisticTaskItemDTO2, bool>(Search)">
+    @*    <ToolBarContent>
+
+    </ToolBarContent>*@
+    <HeaderContent>
+        <MudTh>
+            <MudTooltip Text="Expand all">
+                <MudIconButton Icon="@Icons.Filled.AddBox" Size="Size.Small" Color="Color.Secondary" OnClick="@(ExpandAllLabels)" />
+            </MudTooltip>
+            <MudTableSortLabel SortBy="new Func<LogisticTaskItemDTO2, object>(x => x.LineItemID)">@Localizer["Line"]</MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<LogisticTaskItemDTO2, object>(x => x.ProductID)">@Localizer["Product ID"]</MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<LogisticTaskItemDTO2, object>(x => x.ProductDescription)">@Localizer["Désignation"]</MudTableSortLabel>
+        </MudTh>
+        <MudTh Style="text-align: center">
+            <MudTableSortLabel SortBy="new Func<LogisticTaskItemDTO2, object>(x => x.PlanQuantity)">@Localizer["Quantité"]</MudTableSortLabel>
+        </MudTh>
+
+        <MudTh Style="text-align: right">@Localizer["Actions"]</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>
+            @if (!context.Lables.IsNullOrEmpty())
+            {
+                <MudTooltip Text="Expand">
+                    <MudIconButton Icon="@Icons.Filled.AddBox" Size="Size.Small" Color="Color.Secondary" OnClick="@(() => ExpandLabels(context))" />
+
+                </MudTooltip>
+            }
+
+            @context.LineItemID
+        </MudTd>
+        <MudTd>
+            <MudHighlighter Text="@context.ProductID" HighlightedText="@_searchString" />
+        </MudTd>
+        <MudTd>
+            <MudHighlighter Text="@context.ProductDescription" HighlightedText="@_searchString" />
+        </MudTd>
+        <MudTd Style="@GetLabelCardStyle(context)">
+            @context.PlanQuantity.ToString(_global.QteFormat)   @context.PlanQuantityUnitCode
+        </MudTd>
+        <MudTd DataLabel="Actions" Style="text-align: right">
+            <MudButtonGroup Color="Color.Transparent" Variant="Variant.Outlined">
+                @if (_canCreateLabels)
+                {
+                    <MudTooltip Text="Nouveau">
+                        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="@Color.Success" @onclick="@(() => AddNewLabel(context))" />
+
+                    </MudTooltip>
+                }
+
+                @if (_canPrintLabels && !context.Lables.IsNullOrEmpty())
+                {
+                    <MudTooltip Text="Imprimer">
+                        <MudIconButton Icon="@Icons.Filled.Print" Color="Color.Primary" OnClick="@(() => PrintLables(context))" />
+                    </MudTooltip>
+                }
+            </MudButtonGroup>
+        </MudTd>
+    </RowTemplate>
+    <ChildRowContent>
+
+
+        @if (_expandedLineItems.Contains(context.LineItemID) && !context.Lables.IsNullOrEmpty())
+        {
+            <MudTr>
+
+                <td colspan="5">
+
+
+                    <MudTable Items="@context.Lables" Context="LabelContext"
+                          Dense="true"
+                          Bordered="true"
+                          LoadingProgressColor="Color.Info"
+                          Elevation="2"
+                          Hover="true" ReadOnly="false" CanCancelEdit="true"
+                          Class="lable-table"
+                          @bind-SelectedItem="selectedLabelItem"
+                          SortLabel="Sort By"
+                          CommitEditTooltip="Enregistrer"
+                          CancelEditTooltip="Annuler la modification"
+                          CommitEditIcon="@Icons.Outlined.Check"
+                          RowEditCommit="LabelRowEditCommit"
+                          RowEditPreview="BackupLabel"
+                          RowEditCancel="ResetLabelToOriginalValues"
+                          T="LogisticTaskLabelDTO2"
+                          IsEditRowSwitchingBlocked="@true"
+                          EditTrigger="TableEditTrigger.RowClick">
+
+
+                        <HeaderContent>
+                            @if (context.IsBatchManaged)
+                            {
+                                <MudTh Style="text-align: center"> @Localizer["Lot"]</MudTh>
+                                <MudTh Style="text-align: center"> @Localizer["Lot Fournisseur"]</MudTh>
+                                <MudTh Style="text-align: center">@Localizer["Date Exp"]</MudTh>
+                            }
+
+                            <MudTh Style="text-align: center"> @Localizer["Quantité"]</MudTh>
+                            <MudTh Style="text-align: center"> @Localizer["Colisage"]</MudTh>
+                            <MudTh Style="text-align: center"> @Localizer["Nbr Etiquettes"]</MudTh>
+                            <MudTh Style="text-align: center">
+                                Ecart :   @( (context.Lables.Sum(o=> o.PlanQuantity) - context.PlanQuantity).ToString(_global.QteFormat))  @context.PlanQuantityUnitCode
+                            </MudTh>
+
+                        </HeaderContent>
+
+                        <RowTemplate>
+                            @if (context.IsBatchManaged)
+                            {
+                                <MudTd Style="text-align: left">  @LabelContext.IdentifiedStock   </MudTd>
+                                <MudTd Style="text-align: left">@LabelContext.SupplierIdentifiedStock </MudTd>
+                                <MudTd Style="text-align: center">@LabelContext.ExpirationDate.ToValueString() </MudTd>
+                            }
+                            <MudTd Style="text-align: right">@LabelContext.PlanQuantity.ToString(_global.QteFormat) @LabelContext.QuatityUnite</MudTd>
+                            <MudTd Style="text-align: right">@LabelContext.QuatityOnLabel.ToString(_global.QteFormat) @LabelContext.QuatityUnite</MudTd>
+                            <MudTd Style="text-align: right">@LabelContext.NbrEtiquettesCalc </MudTd>
+                            <MudTd Style="text-align: center">
+
+                                <MudButtonGroup Variant="Variant.Text">
+
+                                    @if (_canCreateLabels && LabelContext.Id > 0)
+                                    {
+                                        <MudTooltip Text="Imprimer">
+                                            <MudIconButton Icon="@Icons.Filled.Print" Color="Color.Primary" OnClick="@(async () => await PrintOneLabelAsync(LabelContext,context))" />
+                                        </MudTooltip>
+                                        <MudTooltip Text="Modifier">
+                                            <MudIconButton Icon="@Icons.Filled.Edit" Color="Color.Primary" OnClick="@(async () => await EditeLabelAsync(LabelContext))" />
+
+                                        </MudTooltip>
+
+                                        <MudTooltip Text="Dupliquer">
+                                            <MudIconButton Icon="@Icons.Filled.AltRoute" Color="Color.Secondary" OnClick="@(() => DuplicateLabel(LabelContext,context))" />
+
+                                        </MudTooltip>
+                                    }
+
+                                    @if (_canDeleteLabels)
+                                    {
+                                        <MudTooltip Text="Supprimer">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="@Color.Error" @onclick="@(async () => await RemoveLabelAsync(@LabelContext,context))" />
+
+                                        </MudTooltip>
+                                    }
+                                </MudButtonGroup>
+
+                            </MudTd>
+
+                        </RowTemplate>
+
+                        <RowEditingTemplate>
+                            @if (context.IsBatchManaged)
+                            {
+                                <MudTd Style="text-align: left">
+
+                                    @if (LabelContext.Id == 0)
+                                    {
+                                        <MudTextField @bind-Value="@LabelContext.IdentifiedStock" Required />
+                                    }
+                                    else
+                                    {
+                                        @LabelContext.IdentifiedStock
+                                    }
+                                </MudTd>
+                                <MudTd Style="text-align: left">
+                                    @if (LabelContext.Id == 0)
+                                    {
+                                        <MudTextField @bind-Value="@LabelContext.SupplierIdentifiedStock" />
+                                    }
+                                    else
+                                    {
+                                        @LabelContext.SupplierIdentifiedStock
+                                    }
+
+
+                                </MudTd>
+                                <MudTd Style="text-align: center">
+                                    @if (LabelContext.Id == 0)
+                                    {
+                                        <MudTextField @bind-Value="@LabelContext.ExpirationDate" />
+                                    }
+                                    else
+                                    {
+                                        @LabelContext.ExpirationDate.ToValueString()
+                                    }
+
+                                </MudTd>
+                            }
+                            <MudTd Style="text-align: right">
+                                <MudTextField @bind-Value="@LabelContext.PlanQuantity" Format="@_global.QteFormat" Culture="_global.CustomCulture" Required />
+                            </MudTd>
+                            <MudTd Style="text-align: right">
+                                <MudTextField @bind-Value="@LabelContext.QuatityOnLabel" Format="@_global.QteFormat" Culture="_global.CustomCulture" Required />
+                            </MudTd>
+                            <MudTd Style="text-align: right">
+                                @LabelContext.NbrEtiquettesCalc
+                            </MudTd>
+                            <MudTd Style="text-align: center"></MudTd>
+
+                        </RowEditingTemplate>
+
+                    </MudTable>
+
+                </td>
+            </MudTr>
+        }
+
+    </ChildRowContent>
+
+
+</MudTable>

@@ -1,0 +1,86 @@
+﻿@using System.Globalization
+@using Uni.Scan.Client.Infrastructure.ApiClients
+@using Uni.Scan.Transfer.DataModel
+
+<style>
+    .footerbar {
+        border-top: solid 1px #4e85c4ff;
+        background: #f0f9f1 !important;
+    }
+
+</style>
+
+<MudDialog Style="background: #f8fbfb">
+    <DialogContent >
+        <div style="max-height:calc(100vh - 110px); height: calc(100vh - 110px); overflow-y: auto;">
+
+            <StockOverViewComponenet @ref="_stockOverViewComponenet" StockSelected="StockSelected"></StockOverViewComponenet>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        
+        @if (!string.IsNullOrWhiteSpace(ProductId))
+        {
+            <MudText Class="fz-13 mr-auto" style="color: #2d81c4; font-weight: bold">
+              ID:  @ProductId 
+            </MudText>
+        }
+        <MudButton Color="Color.Warning" Variant="Variant.Filled" OnClick="Cancel">Fermer</MudButton>
+
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    private StockOverViewComponenet _stockOverViewComponenet;
+
+    [Parameter] public string? SiteId { get; set; }
+    [Parameter] public string? LogisticsArea { get; set; }
+    [Parameter] public string? ProductId { get; set; }
+    [Parameter] public string? IdentifiedStockId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+         
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+             
+            if (_stockOverViewComponenet != null)
+            {
+                await _stockOverViewComponenet.Search(SiteId, LogisticsArea, ProductId, IdentifiedStockId);
+            }
+             
+        }
+    }
+  
+
+    void Cancel() => MudDialog.Cancel();
+
+
+
+    public static async Task<StockOverViewDTO> GetStock(IDialogService dialogService, string siteId, string producID, string identifiedStockId)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add(nameof(StockSelectDialog.ProductId), producID);
+        parameters.Add(nameof(StockSelectDialog.SiteId), siteId);
+        parameters.Add(nameof(StockSelectDialog.IdentifiedStockId), identifiedStockId);
+        var options = new DialogOptions { FullScreen = true,DisableBackdropClick = true };
+
+        var dialog = dialogService.Show<StockSelectDialog>("SELECTION: " + siteId, parameters, options);
+        var result = await dialog.Result;
+        if (result.Cancelled) return null;
+        return (StockOverViewDTO)result.Data;
+
+    }
+
+
+    private void StockSelected(StockOverViewDTO obj)
+    {
+        MudDialog.Close(DialogResult.Ok(obj));
+    }
+
+   
+}

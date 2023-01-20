@@ -1,0 +1,61 @@
+﻿@page "/account/forgot-password"
+@layout MainLayout
+@attribute [AllowAnonymous]
+
+
+
+
+
+<MudAppBar Elevation="5" Dense="true" Style="border-top: solid 2px #7398c1;">
+
+    <MudIcon Icon="@Icons.Material.Filled.QrCode2"></MudIcon>
+    <MudText Typo="Typo.h6" Class="ml-2">UNI=SCAN  </MudText>
+    <MudText Typo="Typo.caption" Class="ml-2">V 1.1</MudText>
+
+
+    <MudSpacer />
+
+
+    @*<MudIconButton   Icon="@Icons.Material.Filled.Settings" Size="Size.Medium" Style="color:#85c3f4;padding: 5px;border: solid" Edge="Edge.Start" />*@
+</MudAppBar>
+
+
+<div style=" background-image: url(images/mar-pattern.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: right bottom;background-color:#eef3f6f2;padding-top: 50px	">
+
+
+
+    <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center" Style="height: calc(100vh - 50px);">
+        <MudPaper Elevation="9" Class="pa-8 rounded-xl">
+            <EditForm Model="@_emailModel" OnValidSubmit="SubmitAsync">
+                <FluentValidationValidator @ref="_fluentValidationValidator" />
+                <MudGrid>
+                    <MudItem xs="12">
+                        <div class="d-flex justify-center">
+                            @*<MudIcon Icon="@CustomIcons.Uni" Color="Color.Primary" Size="Size.Large" ViewBox="0 0 500 500" Style="width: 100px; height: 100px;" />*@
+                        </div>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <div class="d-flex justify-center">
+                            <MudText Typo="Typo.h4">@Localizer["Mot de passe oublié"]</MudText>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <div class="d-flex justify-center">
+                            <MudText Typo="Typo.subtitle2" Class="mb-n4">@Localizer["Veuillez saisir votre addresse courriel ci-dessous et nous vous enverrons un courriel pour changer votre mot de passe."]</MudText>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField Label="@Localizer["E-mail"]" @bind-Value="_emailModel.Email" For="@(() => _emailModel.Email)" Variant="Variant.Outlined"></MudTextField>
+                    </MudItem>
+                    <MudItem xs="12" Class="d-flex justify-center">
+                        <MudButton Variant="Variant.Filled" Disabled="@(!Validated)" Color="Color.Primary" Size="Size.Large" ButtonType="ButtonType.Submit" FullWidth="true">@Localizer["Envoyer un courriel"]</MudButton>
+                    </MudItem>
+                </MudGrid>
+            </EditForm>
+        </MudPaper>
+    </MudContainer>
+
+</div>

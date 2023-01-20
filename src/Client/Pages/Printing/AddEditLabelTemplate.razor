@@ -1,0 +1,65 @@
+﻿@inject Microsoft.Extensions.Localization.IStringLocalizer<AddEditLabelTemplate> _localizer
+@using Uni.Scan.Client.Infrastructure.ApiClients
+
+
+
+<style>
+    .mud-dialog-title{
+        background: #e6f1f8;
+        border-bottom: solid 3px #74bdf0;
+    }
+
+    
+</style>
+
+<EditForm Model="@labelTemplateDTO" OnValidSubmit="SaveAsync">
+        <FluentValidationValidator @ref="_fluentValidationValidator" />
+    <MudDialog>
+        <TitleContent>
+            @{
+                if (labelTemplateDTO.Id == 0)
+                {
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Add" Class="mr-3 mb-n1" />
+                        @_localizer["Ajouter une imprimante "]
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Update" Class="mr-3 mb-n1" />
+                        @_localizer["Mettre a jour une imprimante"]
+                    </MudText>
+                }
+            }
+        </TitleContent>
+        <DialogContent>
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <MudTextField T="string" For="@(() => labelTemplateDTO.ModelName)" @bind-Value="labelTemplateDTO.ModelName" Label="@_localizer["Nom Modèle"]" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField For="@(() => labelTemplateDTO.ModelID)" @bind-Value="labelTemplateDTO.ModelID" Label="@_localizer["ID Modèle"]" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudSelect  @bind-Value="labelTemplateDTO.Type">
+                        <MudSelectItem Value="PrintType.Task" />
+                        <MudSelectItem Value="PrintType.Label" />
+                        <MudSelectItem Value="PrintType.Area" />
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <MudButton DisableElevation Style="width:100%" Variant="Variant.Filled" OnClick="Cancel">@_localizer["Annuler"]</MudButton>
+            @if (labelTemplateDTO.Id != 0)
+            {
+                <MudButton DisableElevation Style="width:100%" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Disabled="@(!Validated)" Color="Color.Secondary">@_localizer["Mettre a jour"]</MudButton>
+            }
+            else
+            {
+                <MudButton DisableElevation Style="width:100%" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Disabled="@(!Validated)" Color="Color.Success">@_localizer["Enregistrer"]</MudButton>
+            }
+        </DialogActions>
+    </MudDialog>
+</EditForm>

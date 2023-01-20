@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html>
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>UniScan</title>
+    <base href="/" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+
+    <link href="_content/MudBlazor/MudBlazor.min.css?v=6.1.4" rel="stylesheet" />
+    <link href="css/loader.css" rel="stylesheet" />
+    <link href="css/SapIcons.css" rel="stylesheet" />
+    <link href="manifest.json" rel="manifest" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png" />
+    <link href="css/app.css" rel="stylesheet" />
+    <script src="lib/barcode/onscan.min.js"></script>
+    <script src="lib/barcode/quagga.min.js"></script>
+    <script src="_content/BlazorIndexedDB/dexie.min.js"></script>
+    <script src="_content/BlazorIndexedDB/blazorDB.js"></script>
+
+</head>
+
+<body style="height: 100vh;background: #eef3f6f2">
+    <div id="app" style="height: 100%;padding:0px;margin:0px">
+        <style>
+            @keyframes slide {
+                0% {
+                    transform: translateX(-25%);
+                }
+
+                100% {
+                    transform: translateX(25%);
+                }
+            }
+
+            .mud-wasm {
+                animation: slide 1s ease-in-out infinite alternate;
+                background-image: linear-gradient(-20deg,#3b71b0 50%,#60a2ef 50%);
+                bottom: 0;
+                left: -50%;
+                opacity: .6;
+                position: fixed;
+                right: -50%;
+                top: 0;
+                z-index: -1
+            }
+
+            .mud-wasm-cont {
+                left: 50%;
+                padding: 10vmin;
+                position: fixed;
+                text-align: center;
+                top: 50%;
+                transform: translate(-50%,-50%)
+            }
+        </style>
+
+        <div style="height:100%;width:100%;margin:0;position:fixed;">
+            <div class="mud-wasm"></div>
+            <div class="mud-wasm" style="animation-direction:alternate-reverse;animation-duration:2s;"></div>
+            <div class="mud-wasm" style="animation-duration:2s;"></div>
+            <div class="mud-wasm-cont ">
+                <img src="loading.svg" />
+            </div>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <div id="uHiddenDiv"> </div>
+
+    <script src="js/scroll.js"></script>
+    <script src="js/sounds.js"></script>
+    <script src="js/file.js"></script>
+    <script src="js/barcodeScanner.js"></script>
+
+    <script type="text/javascript">
+        window.getIsMobileView = function () {
+
+            if ("ontouchstart" in document.documentElement) {
+                return true;
+            }
+            //if (window.matchMedia('(display-mode: fullscreen)').matches)
+            //{
+            //    return true;
+            //}
+            //if (window.matchMedia('(display-mode: standalone)').matches) {
+            //    return true;
+            //}
+            //if (window.innerWidth <= 450 ) {
+            //    return true;
+            //}
+            return false;
+        };
+
+
+    </script>
+    <script src="_framework/blazor.webassembly.js"></script>
+<script src="_content/MudBlazor/MudBlazor.min.js?v=6.1.4"></script>
+
+    <script src="_content/Toolbelt.Blazor.PWA.Updater.Service/script.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,35 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudText>@ContentText</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@Localizer["Annuler"]</MudButton>
+        <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Submit">@ButtonText</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public string ContentText { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public Color Color { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+
+    public static async Task<DialogResult> ShowDialogAsync(IDialogService dialogService,string title, string confirmText, string buttonText, Color color)
+    {
+      
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", confirmText);
+        parameters.Add("ButtonText", buttonText);
+        parameters.Add("Color", color);
+
+        var dialog = dialogService.Show<ConfirmationDialog>(title, parameters);
+       return await dialog.Result;
+    }
+
+   
+}

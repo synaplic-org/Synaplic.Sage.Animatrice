@@ -1,0 +1,90 @@
+﻿@page "/Mobile/StockAnomaly"
+@using Uni.Scan.Transfer.DataModel;
+
+
+
+<style>
+    tbody tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #fff;
+    }
+
+    .mud-table-cell {
+        font-weight: bold;
+        font-size: xx-small;
+    }
+
+    .mud-table-sort-label {
+        font-weight: bolder;
+        font-size: small;
+    }
+
+    .mud-badge-unsigned {
+        background-color: #ebcf7c;
+        color: white;
+    }
+</style>
+
+@if (_global.IsMobileView)
+{
+    <MudAppBar Elevation="5" Dense="true" Style="border-top: solid 2px #7398c1;">
+
+
+        <MudText Typo="Typo.h6" Class="ml-2">@Localizer[@Elements.Count().ToString()] Anomalie</MudText>
+
+        <MudSpacer />
+
+
+        <MudIconButton Disabled="_global.IsLoading" Icon="@Icons.Material.Filled.Refresh" Size="Size.Medium" Style="color:#85c3f4;padding: 5px;border: solid" Edge="Edge.Start" />
+    </MudAppBar>
+}
+<MudTable Items="@Elements" Dense="@dense" Hover="@hover" ReadOnly="@ronly" Loading="@_global.IsLoading" LoadingProgressColor="Color.Info" Breakpoint="Breakpoint.None"
+          SortLabel="Sort By" Style="background-color: #e6f1f8;">
+
+            <HeaderContent>
+                @if (_global.IsMobileView)
+                {
+                    <MudTh Style="text-align:left"><MudTableSortLabel SortBy="new Func<StockAnomalyDTO, object>(x=>x.LogisticsArea)">@Localizer["Zone Logistique"]</MudTableSortLabel></MudTh>
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<StockAnomalyDTO, object>(x=>x.ProductID)">@Localizer["Produit"]</MudTableSortLabel></MudTh>
+                    <MudTh></MudTh>
+
+                }
+            </HeaderContent>
+
+            <RowTemplate>
+                @if (_global.IsMobileView)
+                {
+                    <MudTd Style="text-align:left" DataLabel="LogisticArea"><MudHighlighter Text="@context.LogisticsArea" HighlightedText="@searchString" /></MudTd>
+                    <MudTd Style="text-align:center" DataLabel="ProductId"><MudHighlighter Text="@context.ProductID" HighlightedText="@searchString" /></MudTd>
+                    <MudTd Style="text-align:right">
+                        <MudTooltip Text="Voir">
+                            <MudIconButton Icon="@Icons.Material.Filled.RemoveRedEye" Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => InvokeModal(@context.Id))" />
+                        </MudTooltip>
+                    </MudTd>
+                }
+                
+            </RowTemplate>
+        </MudTable>
+
+@if (_global.IsMobileView)
+{
+    <div style="margin-bottom: 53px"></div>
+    <MudAppBar Bottom="true" Fixed="true" Color="Color.Primary" Elevation="1" Class="mobile-footer-barr">
+        <MudIconButton @ref="returnButton" Icon="@Icons.Material.Filled.KeyboardReturn" Style="background-color: orange;color: white" Edge="Edge.Start"
+                   OnClick="@(BackToParent)" />
+
+        <MudSpacer />
+
+        <MudTextField @bind-Value="searchString" Immediate="true" Clearable="true" FullWidth="true" Placeholder="@Localizer["Search"]"
+                  AdornmentIcon="@Icons.Material.Filled.FilterAlt" Adornment="Adornment.Start" Class="invisible mx-6 mb-5"></MudTextField>
+        @if (_canCreateAnomalies)
+        {
+            <MudIconButton Disabled="_global.IsLoading" Icon="@Icons.Filled.Add" Class="" Style="background-color: #1E88E5;color: white" Edge="Edge.Start"
+                   OnClick="(() => InvokeModal())" />
+        }
+
+    </MudAppBar>
+}

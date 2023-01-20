@@ -1,0 +1,78 @@
+﻿@*Libraries*@
+@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.JSInterop
+@using Microsoft.AspNetCore.Identity;
+@using MudBlazor
+@using Blazored.LocalStorage;
+@using Blazored.FluentValidation
+@using System.Data
+@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Threading.Tasks
+@using BlazorDB
+
+@*Client Services*@
+@using Uni.Scan.Client.Infrastructure.ApiClients
+@using Uni.Scan.Client.Infrastructure.Managers.Identity.Account
+@using Uni.Scan.Client.Infrastructure.Managers.Identity.Authentication
+@using Uni.Scan.Client.Infrastructure.Managers.Identity.Roles
+@using Uni.Scan.Client.Infrastructure.Managers.Identity.RoleClaims
+@using Uni.Scan.Client.Infrastructure.Managers.Identity.Users
+@using Uni.Scan.Client.Infrastructure.Managers.Preferences
+@using Uni.Scan.Client.Infrastructure.Managers.Interceptors
+@using Uni.Scan.Client.Infrastructure.Managers.Audit
+@using Uni.Scan.Client.Infrastructure.Extensions
+
+@*Shared Libraries*@
+@using Uni.Scan.Shared.Constants.Permission
+@using Uni.Scan.Shared.Constants
+@using Uni.Scan.Shared.Constants.Integration
+@using Uni.Scan.Shared.Extensions
+@using Uni.Scan.Client
+@using Uni.Scan.Client.Shared
+@using Uni.Scan.Client.Shared.Dialogs
+@using Uni.Scan.Client.Shared.Components
+@using Uni.Scan.Client.Infrastructure.Settings
+
+
+@using Uni.Scan.Client.Pages.Authentication
+
+@using Uni.Scan.Client.Infrastructure.Authentication
+@using Uni.Scan.Client.Extensions
+
+
+
+@using Uni.Scan.Transfer.Requests
+@using Uni.Scan.Shared.Enums
+@using Uni.Scan.Shared.Localizers
+
+
+@*Global injection*@
+@attribute [Authorize]
+@inject IAuthenticationManager _authenticationManager
+@inject IAccountManager _accountManager
+@inject NavigationManager _navigationManager
+@inject UniStateProvider _stateProvider
+@inject IAuthorizationService _authorizationService
+@inject ISnackbar _snackBar
+@inject IDialogService _dialogService
+@inject HttpClient _httpClient
+@inject IHttpInterceptorManager _interceptor
+@inject ClientPreferenceManager _clientPreferenceManager
+@inject IUserManager _userManager
+@inject ILocalStorageService _localStorage;
+@inject IJSRuntime _jsRuntime;
+@inject GlobalVariables _global;
+
+@inject Microsoft.Extensions.Localization.IStringLocalizer<FrontEndLocalizer> Localizer
+
+@inject IBlazorDbFactory _dbFactory

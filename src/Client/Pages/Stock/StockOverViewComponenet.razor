@@ -1,0 +1,178 @@
+﻿@using Uni.Scan.Client.Infrastructure.Managers.Logistics
+@using Uni.Scan.Transfer.DataModel
+@using System.Security.Claims
+@if (_loading)
+{
+    <div style="text-align: center;">
+        <MudProgressCircular Style="margin: 40px;" Color="Color.Primary" Indeterminate="true"/>
+    </div>
+}
+else if (_executed && _stockOverViewList.IsNullOrEmpty())
+{
+    <div style="text-align: center;background: white; font-weight: 600;">
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">
+            @Localizer["Aucun élément trouvé !"]
+        </MudAlert>
+    </div>
+}
+else
+{
+    @foreach (var i in _stockOverViewList)
+    {
+        <MudPaper Elevation="3" class="pa-3 mt-3" Style="@PaperStyle(i)" @onclick="async () => await SelectArticle(i)">
+
+
+            <div class="d-flex">
+               @if(!i.ProductID.Equals(_currentProductID))
+            {
+                <MudText Class="fz-13" style="color: #0a5291; font-weight: bold">
+                    @i.ProductID
+                </MudText>
+            }
+
+
+
+                <MudText Typo="Typo.caption" Class="@(i.ProductID.Equals(_currentProductID) ? "mt-1":"mt-1 ml-auto")" Style="color: #2196f3; font-size: 11px; font-weight: bold">
+                    Zone :
+
+
+                    @if (_currentSiteID == "*")
+                    {
+                        @(i.SiteID + "/")
+                    }
+                    @i.LogisticsAreaID
+
+                </MudText>
+
+
+            </div>
+            <div class="d-flex" style="">
+                <div>
+
+
+                    <MudText Typo="Typo.caption" Class="mt-1" Style="font-size: 11px; font-weight: bold; color: #95149f">
+
+                        @if (i.InventoryRestrictedUseIndicator)
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.DoNotDisturbOn" Style="font-size: 14px;" Color="Color.Error"/>
+                        }
+
+                        @if (i.InventoryInInspectionIndicator)
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Lock" Style="font-size: 14px;" Color="Color.Warning"/>
+                        }
+
+                        Lot :
+                        @i.IdentifiedStockID
+                    </MudText>
+                </div>
+
+
+                <MudText Typo="Typo.caption" Class="mt-1 ml-auto" Style="text-align: right; color: #141895; font-size: smaller; font-weight: bold">
+                    @i.Quantity.ToString("N") @i.QuantityUniteCode
+                </MudText>
+
+
+            </div>
+            @if (i.ExprirationDate.Length >= 10)
+            {
+                <div class="d-flex">
+
+
+                    <MudText Typo="Typo.caption" Class="mt-1 " Style="font-weight: bold; font-size: 10px; font-weight: bold; color: #f6007b">
+                        Expiration :
+                        @i.ExprirationDate.Substring(0, 10)
+                    </MudText>
+                </div>
+            }
+
+
+        </MudPaper>
+    }
+}
+
+
+
+@code {
+
+
+    [Inject]
+    private IStockClient _StockClient { get; set; }
+
+
+    private List<StockOverViewDTO> _stockOverViewList = new();
+    private ClaimsPrincipal _currentUser = new();
+
+    private bool _loading;
+    private bool _executed;
+    private string _currentSiteID = string.Empty;
+    private string _currentProductID= string.Empty;
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    var state = await _stateProvider.GetAuthenticationStateAsync();
+    //    _currentSiteID = state.User.GetSiteID();
+    //}
+
+    string PaperStyle(StockOverViewDTO obj)
+    {
+        if (obj.InventoryRestrictedUseIndicator)
+        {
+            return "border-left: solid 4px red";
+        }
+        if (obj.InventoryInInspectionIndicator)
+        {
+            return "border-left: solid 4px orange";
+        }
+
+
+        return "border-left: solid 4px #597ceb";
+    }
+
+    public async Task Search(string? siteId, string? logisticsArea, string? productId, string? identifiedStockId)
+    {
+        _currentSiteID = siteId;
+        _currentProductID = productId;
+        _executed = true;
+
+        _stockOverViewList = new List<StockOverViewDTO>();
+        _loading = true;
+        StateHasChanged();
+        try
+        {
+            var response =
+                await _StockClient.GetStockOverViewListAsync(siteId, logisticsArea, productId, identifiedStockId);
+            if (response.Succeeded)
+            {
+                _stockOverViewList = response.Data.ToList();
+            }
+            else
+            {
+                await _dialogService.ShowErrors(response.Messages);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            await _dialogService.ShowErrors(e);
+        }
+        _loading = false;
+        StateHasChanged();
+    }
+
+    private string CardStyle(bool b)
+    {
+        if (b) return "margin: 5px; border-left: solid 3px #ff6700;";
+        return "margin: 5px; border-left: solid 3px #25638d;";
+    }
+
+
+    [Parameter]
+    public EventCallback<StockOverViewDTO> StockSelected { get; set; }
+
+    private async Task SelectArticle(StockOverViewDTO obj)
+    {
+        await StockSelected.InvokeAsync(obj);
+    }
+
+}

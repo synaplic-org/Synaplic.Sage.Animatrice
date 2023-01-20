@@ -1,0 +1,202 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl" Namespace="Model1.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2005">
+        <EntityContainer Name="Model1TargetContainer" >
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" xmlns:cg="http://schemas.microsoft.com/ado/2006/04/codegeneration" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" Namespace="UniScanModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" annotation:UseStrongSpatialTypes="false">
+        <EntityContainer Name="Model1Container" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Task" EntityType="UniScanModel.Task" />
+          <EntitySet Name="TaskDetail" EntityType="UniScanModel.TaskDetail" />
+          <AssociationSet Name="TaskTaskLine" Association="UniScanModel.TaskTaskLine">
+            <End Role="Task" EntitySet="Task" />
+            <End Role="TaskLine" EntitySet="TaskDetail" />
+          </AssociationSet>
+          <EntitySet Name="Label" EntityType="UniScanModel.Label" />
+          <EntitySet Name="Material" EntityType="UniScanModel.Material" />
+          <EntitySet Name="LogisticArea" EntityType="UniScanModel.LogisticArea" />
+          <AssociationSet Name="TaskLineLogisticArea" Association="UniScanModel.TaskLineLogisticArea">
+            <End Role="TaskLine" EntitySet="TaskDetail" />
+            <End Role="LogisticArea" EntitySet="LogisticArea" />
+          </AssociationSet>
+          <AssociationSet Name="TaskLineLabel" Association="UniScanModel.TaskLineLabel">
+            <End Role="TaskLine" EntitySet="TaskDetail" />
+            <End Role="Label" EntitySet="Label" />
+          </AssociationSet>
+          <EntitySet Name="TaskScan" EntityType="UniScanModel.TaskScan" />
+          <AssociationSet Name="TaskLineTaskScan" Association="UniScanModel.TaskLineTaskScan">
+            <End Role="TaskLine" EntitySet="TaskDetail" />
+            <End Role="TaskScan" EntitySet="TaskScan" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="Task">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="String" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="OperationType" Type="String" Nullable="false" />
+          <Property Name="OperationTypeCode" Type="String" Nullable="false" />
+          <Property Name="Status" Type="String" Nullable="false" />
+          <Property Name="ResponsibleName" Type="String" Nullable="false" />
+          <Property Name="TaskFolderId" Type="String" Nullable="false" />
+          <Property Name="Priority" Type="String" Nullable="false" />
+          <Property Name="RequestId" Type="Int32" Nullable="false" />
+          <Property Name="StartDate" Type="DateTime" Nullable="false" />
+          <Property Name="EndDate" Type="DateTime" Nullable="false" />
+          <Property Name="Site" Type="String" Nullable="false" />
+          <Property Name="Notes" Type="String" Nullable="false" />
+          <NavigationProperty Name="TaskLines" Relationship="UniScanModel.TaskTaskLine" FromRole="Task" ToRole="TaskLine" />
+          <Property Name="ThirdPartyKey" Type="String" Nullable="false" />
+          <Property Name="ThirdpartyName" Type="String" Nullable="false" />
+          <Property Name="TransactionReferenceID" Type="String" Nullable="false" />
+          <Property Name="TaskUUID" Type="String" Nullable="false" />
+        </EntityType>
+        <EntityType Name="TaskDetail">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="String" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="OpenQuantity" Type="Int32" Nullable="false" />
+          <Property Name="FulfiledQuantity" Type="Int32" Nullable="false" />
+          <Property Name="SourceLogisticsAreaId" Type="String" Nullable="false" />
+          <Property Name="TargetLogisticsAreaId" Type="String" Nullable="false" />
+          <Property Name="IdentifiedStockID" Type="Int32" Nullable="false" />
+          <Property Name="Owner" Type="String" Nullable="false" />
+          <Property Name="PlanningArea" Type="String" Nullable="false" />
+          <Property Name="Reference" Type="String" Nullable="false" />
+          <Property Name="DeliveryNotification" Type="String" Nullable="false" />
+          <Property Name="WarehouseRequest" Type="Int32" Nullable="false" />
+          <Property Name="WarehouseOrder" Type="Int32" Nullable="false" />
+          <Property Name="InboundDelivery" Type="String" Nullable="false" />
+          <Property Name="Restricted" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Task" Relationship="UniScanModel.TaskTaskLine" FromRole="TaskLine" ToRole="Task" />
+          <Property Name="Unite" Type="String" Nullable="false" />
+          <Property Name="Product" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Labels" Relationship="UniScanModel.TaskLineLabel" FromRole="TaskLine" ToRole="Label" />
+          <Property Name="LogisticAreaId" Type="Int32" Nullable="false" />
+          <Property Name="PlanQuantity" Type="String" Nullable="false" />
+          <Property Name="TaskLineUUID" Type="String" Nullable="false" />
+          <NavigationProperty Name="TaskScans" Relationship="UniScanModel.TaskLineTaskScan" FromRole="TaskLine" ToRole="TaskScan" />
+        </EntityType>
+        <Association Name="TaskTaskLine">
+          <End Type="UniScanModel.Task" Role="Task" Multiplicity="1" />
+          <End Type="UniScanModel.TaskDetail" Role="TaskLine" Multiplicity="*" />
+        </Association>
+        <EntityType Name="Label">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="String" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Status" Type="String" Nullable="false" />
+          <Property Name="Type" Type="String" Nullable="false" />
+          <Property Name="IdentifiedStockId" Type="String" Nullable="false" />
+          <Property Name="QuatityOnLabel" Type="String" Nullable="false" />
+          <Property Name="ExternalId" Type="String" Nullable="false" />
+          <NavigationProperty Name="TaskLine" Relationship="UniScanModel.TaskLineLabel" FromRole="Label" ToRole="TaskLine" />
+          <Property Name="TaskLineId" Type="Int32" Nullable="false" />
+          <Property Name="LabelUUID" Type="String" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Material">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="String" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Description" Type="String" Nullable="false" />
+          <Property Name="Details" Type="String" Nullable="false" />
+          <Property Name="ProductCategory" Type="String" Nullable="false" />
+          <Property Name="BaseUoM" Type="String" Nullable="false" />
+          <Property Name="IdentifiedStockType" Type="String" Nullable="false" />
+          <Property Name="BatchManaged" Type="Boolean" Nullable="false" />
+          <Property Name="ProductSpecificationEnabled" Type="Boolean" Nullable="false" />
+          <Property Name="SerialNumberProfile" Type="String" Nullable="false" />
+          <Property Name="MaterialUUID" Type="String" Nullable="false" />
+        </EntityType>
+        <EntityType Name="LogisticArea">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="String" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Status" Type="String" Nullable="false" />
+          <Property Name="Description" Type="String" Nullable="false" />
+          <Property Name="SiteId" Type="String" Nullable="false" />
+          <Property Name="StorageLocationId" Type="String" Nullable="false" />
+          <Property Name="ParentLogisticArea" Type="String" Nullable="false" />
+          <Property Name="EmptyLogisticArea" Type="String" Nullable="false" />
+          <Property Name="Type" Type="String" Nullable="false" />
+          <Property Name="TaskLinePlanningArea" Type="String" Nullable="false" />
+          <Property Name="LogisticAreaUUID" Type="String" Nullable="false" />
+        </EntityType>
+        <Association Name="TaskLineLogisticArea">
+          <End Type="UniScanModel.TaskDetail" Role="TaskLine" Multiplicity="*" />
+          <End Type="UniScanModel.LogisticArea" Role="LogisticArea" Multiplicity="1" />
+        </Association>
+        <Association Name="TaskLineLabel">
+          <End Type="UniScanModel.TaskDetail" Role="TaskLine" Multiplicity="1" />
+          <End Type="UniScanModel.Label" Role="Label" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskLine">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Label">
+              <PropertyRef Name="TaskLineId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="TaskScan">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="TaskLine" Relationship="UniScanModel.TaskLineTaskScan" FromRole="TaskScan" ToRole="TaskLine" />
+          <Property Name="TaskLineId" Type="String" Nullable="false" />
+        </EntityType>
+        <Association Name="TaskLineTaskScan">
+          <End Type="UniScanModel.TaskDetail" Role="TaskLine" Multiplicity="1" />
+          <End Type="UniScanModel.TaskScan" Role="TaskScan" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskLine">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="TaskScan">
+              <PropertyRef Name="TaskLineId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs" Space="C-S">
+        <Alias Key="Model" Value="Model1" />
+        <Alias Key="Target" Value="Model1.Store" />
+        <EntityContainerMapping CdmEntityContainer="Model1Container" StorageEntityContainer="Model1TargetContainer">
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <edmx:Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </edmx:Connection>
+    <edmx:Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="False" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </edmx:Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

@@ -1,0 +1,183 @@
+﻿@using System.Globalization
+@using Uni.Scan.Client.Infrastructure.ApiClients
+@using Uni.Scan.Transfer.DataModel
+
+<style>
+    .footerbar {
+        border-top: solid 1px #4e85c4ff;
+        background: #f0f9f1 !important;
+    }
+
+</style>
+
+<MudDialog>
+    <DialogContent>
+
+        <MudPaper Elevation="1" class="pa-2 mt-2" Style="">
+
+            <div class="d-flex" style="">
+                <MudText Typo="Typo.body1" style="color:#0a5291;font-weight: bold">
+                    @Model.ProductID
+                </MudText>
+                <div class="d-flex ml-auto">
+
+                    <MudText Typo="Typo.caption" Class="mt-1">
+                        Zone :
+                        <strong style="font-weight:bold">
+                            @Model.LogisticsAreaID
+                        </strong>
+                    </MudText>
+                </div>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(@Model.ProductDescription))
+            {
+
+                <div class="d-flex" style="">
+                    <MudText Typo="Typo.body1" style="color:#0a5291;font-weight: bold">
+                        @Model.ProductDescription
+                    </MudText>
+
+                </div>
+            }
+
+            <div class="d-flex" style="padding-right:4px">
+                <MudText Typo="Typo.caption" Class="mt-1" Style="font-weight: bold; color: #95149f">
+                    Lot :
+                    @Model.IdentifiedStockID
+                </MudText>
+                <div class="d-flex ml-auto">
+
+                    <MudText Typo="Typo.body2" Class="mt-1">
+                        <strong style="font-weight:bold">
+                            @Model.Quantity.ToString("N")
+                        </strong>
+                        @Model.QuantityUniteCode
+                    </MudText>
+                </div>
+
+            </div>
+
+        </MudPaper>
+
+        <MudPaper Elevation="5" class="pa-3 mt-3">
+            @if (_global.IsLoading)
+            {
+                <MudProgressLinear Color="Color.Secondary" Indeterminate="true" Class="my-0" />
+            }
+            <div>
+
+                <MudTextField For="@(() => Request.TargetLogisticsAreaID)"
+                              @bind-Value="Request.TargetLogisticsAreaID" Label="@Localizer["Zone Logistique Cible"]" OnBlur="Validate"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.ZoomInMap" AdornmentColor="Color.Secondary"
+                              Clearable="true"
+                              Error="_LogisticAreaError" />
+
+
+
+                <MudNumericField For="@(() => Request.Quantity)" OnBlur="Validate"
+                                 @bind-Value="Request.Quantity" 
+                                 Culture="_global.CustomCulture"
+                                 Format="@_global.QteFormat" Label="@(Localizer["Quantity in "] + "  " + Model.QuantityUniteCode)"
+                                 HideSpinButtons="true" Adornment="Adornment.Start" AdornmentColor="Color.Info"
+                                 OnAdornmentClick="@(FilleQuantite)" AdornmentIcon="@Icons.Filled.Balance" 
+                                 Clearable="true"
+                                 Error="_QuantiteError" />
+
+
+            </div>
+
+
+        </MudPaper>
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Warning" Disabled="_global.IsLoading" Variant="Variant.Outlined" OnClick="Cancel">Annuler</MudButton>
+        <MudButton Color="Color.Primary" Disabled="_global.IsLoading" Variant="Variant.Filled" OnClick="moveTask">Transférer</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public StockOverViewDTO Model { get; set; }
+    [Inject] private IStockClient _stockClient { get; set; }
+
+    private InventoryItemMovementRequest Request = new();
+
+    public decimal? Qte;
+
+    private void Validate()
+    {
+        _QuantiteError = (Request.Quantity == 0) || (Request.Quantity > Model.Quantity);
+        _LogisticAreaError = string.IsNullOrWhiteSpace(Request.TargetLogisticsAreaID) || Request.TargetLogisticsAreaID == Model.LogisticsAreaID;
+    }
+
+    private  async Task moveTask()
+    {
+        //la qte et la target area sont binded
+        Validate();
+        if (_QuantiteError || _LogisticAreaError) return;
+
+        _global.IsLoading = true;
+        Request.SiteID = Model.SiteID;
+        Request.IdentifiedStockID = Model.IdentifiedStockID;
+        Request.QuantityTypeCode = Model.QuantityUniteCode;
+        Request.SourceLogisticsAreaID = Model.LogisticsAreaID;
+        Request.InventoryRestrictedUseIndicator = Model.InventoryRestrictedUseIndicator;
+        Request.OwnerPartyInternalID = Model.OwnerPartyID;
+        Request.InventoryStockStatusCode = Model.InventoryStockStatusCode;
+        Request.MaterialInternalID = Model.ProductID;
+        Request.TransactionDateTime = DateTime.Now;
+
+        try
+        {
+
+            var response = await _stockClient.MoveItemStockAsync(Request);
+            if (response.Succeeded)
+            {
+                _global.IsLoading = false;
+                Submit();
+            }
+            else
+            {
+                await _dialogService.ShowErrors(response.Messages);
+            }
+        }
+        catch (Exception e)
+        {
+            await _dialogService.ShowErrors(e);
+        }
+        
+            _global.IsLoading = false;
+       
+
+    }
+
+    void Cancel() => MudDialog.Cancel();
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+
+    public static async Task<bool> MoveProduct(IDialogService dialogService, StockOverViewDTO stockOverViewDTO)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add(nameof(StockMouvementDialog.Model), stockOverViewDTO);
+
+
+        var options = new DialogOptions { FullScreen = false, FullWidth = true, DisableBackdropClick = true };
+
+        var dialog = dialogService.Show<StockMouvementDialog>("TRANSFERT", parameters, options);
+        var result = await dialog.Result;
+        return !result.Cancelled;
+
+    }
+
+    private void FilleQuantite()
+    {
+        Request.Quantity = Model.Quantity;
+    }
+
+    private bool _LogisticAreaError;
+    private bool _QuantiteError;
+
+  
+
+}

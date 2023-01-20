@@ -1,0 +1,93 @@
+﻿@inherits LayoutComponentBase
+
+
+@*<audio id="notification" src="/media/notification.mp3" />*@
+<MudThemeProvider Theme="_currentTheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<AuthorizeView>
+    <NotAuthorized>
+
+        <CascadingValue Value="hubConnection">
+            @Body
+        </CascadingValue>
+
+    </NotAuthorized>
+    <Authorized>
+
+        <MudLayout RightToLeft="@_rightToLeft">
+            <MudAppBar Elevation="25" Dense="true" Style="border-top: solid 2px #7398c1;">
+              
+                @if (_global.IsMobileView)
+                {
+                    
+                    <MudTooltip Text="logout">
+                        <MudIconButton Icon="@Icons.Material.Filled.Lock"  
+                                       Style="background-color: red;color: white;height:40px; width:40px;" 
+                                       Edge="Edge.Start"
+                                       OnClick="@(Logout)"/>
+                    </MudTooltip>
+                }
+                else
+                {
+                    <MudTooltip Text="Toggle Drawer">
+                        <MudIconButton Icon="@Icons.Rounded.Menu" Color="Color.Inherit" Edge="Edge.Start"
+                                   OnClick="@((e) => DrawerToggle())" />
+                    </MudTooltip>
+                }
+
+                @*    <MudToolBar DisableGutters="true">
+                <MudIconButton Icon="@Icons.Material.Outlined.Menu" Color="Color.Inherit" OnClick="@((e) => DrawerToggle())" />
+                </MudToolBar>*@
+
+                <MudText Typo="Typo.h6" Class="ml-4">@_global.CurrentTitle</MudText>
+               @* @if (_global.IsLoading)
+                {
+                  <MudProgressLinear Color="Color.Secondary" Indeterminate="true" Size="Size.Medium" Class="mx-3" />
+                }*@
+            
+                <MudSpacer />
+                <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+                    @*  <LanguageSelector />*@
+                </MudHidden>
+                <MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
+                    @*  <LanguageSelector />*@
+                </MudHidden>
+
+                <MudMenu Direction="_rightToLeft ? Direction.Right : Direction.Left" OffsetX="true" Dense="true" Class="mt-1 ml-4">
+                    <ActivatorContent>
+                        @if (string.IsNullOrEmpty(ImageDataUrl))
+                        {
+                            <MudAvatar Color="Color.Primary">@FirstLetterOfName</MudAvatar>
+                        }
+                        else
+                        {
+                            <MudAvatar Image="@ImageDataUrl" Style="height: 40px; width: 40px; border: solid 2px;"> </MudAvatar>
+                        }
+                    </ActivatorContent>
+                    <ChildContent>
+
+                        <UserCard Class="mt-n2" />
+                        <MudDivider Class="mb-2" />
+                        <MudListItem Text="@Localizer["Account"]" Href="/account" Icon="@Icons.Material.Outlined.Person" />
+                        <MudListItem Text="@Localizer["Logout"]" Icon="@Icons.Material.Filled.Logout" OnClick="Logout" />
+                    </ChildContent>
+                </MudMenu>
+            </MudAppBar>
+            @if (_global.IsMobileView == false)
+            {
+                <MudDrawer @bind-Open="_drawerOpen" Elevation="25" ClipMode="DrawerClipMode.Always">
+                    <NavMenu />
+                </MudDrawer>
+            }
+
+            <MudMainContent Style="padding: 50px 0px 0px 0px;">
+                <MudContainer MaxWidth="MaxWidth.False" Style="padding: 4px;">
+                    <CascadingValue Value="hubConnection">
+                        @Body
+                    </CascadingValue>
+                </MudContainer>
+            </MudMainContent>
+        </MudLayout>
+    </Authorized>
+</AuthorizeView>

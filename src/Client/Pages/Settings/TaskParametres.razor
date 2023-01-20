@@ -1,0 +1,189 @@
+﻿@page "/identity/Parametres"
+@using Uni.Scan.Client.Infrastructure.ApiClients
+@using Uni.Scan.Transfer.DataModel;
+@inject Microsoft.Extensions.Localization.IStringLocalizer<TaskParametres> Localizer
+
+
+<style>
+    .mud-table-container {
+        overflow: auto;
+    }
+    .mud-table-root .mud-table-head .mud-table-cell {
+        border-top: solid 6px #74bdf0;
+        color: #000;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .mud-table-body {
+        background: #FFF;
+    }
+
+    .mud-table-sort-label {
+        font-weight: bolder;
+        font-size: medium;
+    }
+
+    .mud-toolbar mud-table-toolbar {
+        background: #FFF !important;
+    }
+
+    .mud-table-head {
+        background: #e6f1f8 !important;
+    }
+
+</style>
+
+<HeroTitle Title="@Localizer["Gérer les Paramètres"]"  />
+
+<MudTabs Elevation="25"  Rounded="true" Centered="true" ApplyEffectsToContainer="true" NextIcon="@Icons.Material.Filled.SkipNext" Style="font-size: small;">
+    <MudTabPanel Class="ma-1" Text="Model d'Impression"      BadgeData="_labelTemplateDTO.Count()" BadgeColor="Color.Info" >
+   
+
+            <MudTable Hover="true" Elevation="25" Breakpoint="Breakpoint.None" Loading="@_global.IsLoading" LoadingProgressColor="Color.Info" Items="_labelTemplateDTO" Dense="true" Bordered="false" Striped="true" Filter="new Func<LabelTemplateDTO, bool>(Search)" @bind-brand="_labelTemplate">
+        <ToolBarContent>
+                @if (_canSearchParametres)
+                {
+                    <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="@Localizer["Rechercher"]" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="ma-2 pa-2"></MudTextField>
+                }
+              
+                @if (_canCreateParametres)
+                {
+                            <MudButton DisableElevation Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Refresh" OnClick="(() => GetParametresAsync())" IconColor="Color.Surface" Color="Color.Success" Class=" ma-2">@Localizer["Rafraîchir"]</MudButton>
+                    <MudButton DisableElevation Variant="Variant.Filled" Color="Color.Surface" OnClick="(() => InvokeModal())" StartIcon="@Icons.Material.Filled.Add" IconColor="Color.Dark" Class="ma-2">@Localizer["Créer"]</MudButton>
+
+               }
+                else
+                {
+                    <MudButton DisableElevation Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Refresh" OnClick="(() => GetParametresAsync())" IconColor="Color.Surface" Color="Color.Success" Class=" ma-2">@Localizer["Rafraîchir"]</MudButton>
+                }
+
+          
+            
+        </ToolBarContent>
+        <HeaderContent>
+                   <MudTh><MudTableSortLabel SortBy="new Func<LabelTemplateDTO, object>(x => x.ModelName)">@Localizer["Nom Modèle"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<LabelTemplateDTO, object>(x => x.ModelID)">@Localizer["ID Modèle"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<LabelTemplateDTO, object>(x => x.Type)">@Localizer["Type"]</MudTableSortLabel></MudTh>
+            <MudTh Style="text-align:right">@Localizer["Actions"]</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="ModelName">
+                <MudHighlighter Text="@context.ModelName" HighlightedText="@_searchString" />
+            </MudTd>
+            <MudTd DataLabel="ModelID">
+                <MudHighlighter Text="@context.ModelID" HighlightedText="@_searchString" />
+            </MudTd>
+            <MudTd DataLabel="Type">
+             <MudChip Variant="Variant.Filled">
+                 @context.Type
+             </MudChip>
+            </MudTd>
+
+            <MudTd DataLabel="Actions" Style="text-align: right">
+                @if (_canEditParametres || _canDeleteParametres)
+                {
+                    <MudMenu Label="@Localizer["Actions"]" Variant="Variant.Filled" DisableElevation="true" EndIcon="@Icons.Filled.KeyboardArrowDown" IconColor="Color.Secondary" Direction="Direction.Left" OffsetX="true">
+                        @if (_canEditParametres)
+                        {
+                            <MudMenuItem  @onclick="@(() => InvokeModal(@context.Id))">@Localizer["Modifier modèle"]</MudMenuItem>
+                        }
+                        @if (_canDeleteParametres)
+                        {
+                            <MudMenuItem @onclick="@(() => Delete(@context.Id))">@Localizer["Supprimer modèle"]</MudMenuItem>
+                        }
+                    </MudMenu>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Filled"
+                               DisableElevation="true"
+                               StartIcon="@Icons.Material.Filled.DoNotTouch"
+                               IconColor="Color.Secondary"
+                               Size="Size.Small"
+                               Color="Color.Surface">
+                        @Localizer["Actions non autorisées"]
+                    </MudButton>
+                }
+            </MudTd>
+        </RowTemplate>
+        @*<FooterContent>
+            <MudSwitch @bind-Checked="@_dense" Color="Color.Secondary" Style="margin-left: 5px;">@Localizer["Dense"]</MudSwitch>
+            <MudSwitch @bind-Checked="@_striped" Color="Color.Tertiary" Style="margin-left: 5px;">@Localizer["Rayée"]</MudSwitch>
+             <MudSwitch @bind-Checked="@_bordered" Color="Color.Primary" Style="margin-left: 5px;">@Localizer["Bordures"]</MudSwitch>
+        </FooterContent>*@
+        <PagerContent>
+            <TablePager />
+        </PagerContent>
+    </MudTable>
+
+    </MudTabPanel>
+    <MudTabPanel Class="ma-1" Text="Model Code d'Impression" BadgeData="_scanningCodeDTO.Count()"  BadgeColor="Color.Info">
+
+       
+            <MudTable Hover="true" Elevation="25" Items="_scanningCodeDTO" Breakpoint="Breakpoint.None" Loading="@_global.IsLoading" LoadingProgressColor="Color.Info" Dense="false" Bordered="false" Striped="true" CommitEditTooltip="Enregistrer"  Filter="new Func<ScanningCodeDTO, bool>(CodeSearch)">
+                <ToolBarContent>
+                @if (_canSearchParametres)
+                {
+                    <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="@Localizer["Rechercher"]" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="ma-2 pa-2"></MudTextField>
+                }
+
+                    <MudButton DisableElevation OnClick="(() => SendAllCodes())" Variant="Variant.Filled" Color="Color.Surface" StartIcon="@Icons.Material.Filled.Save" IconColor="Color.Dark" Class="ma-2">@Localizer["Enregistrer Tout"]</MudButton>
+                    
+                    
+
+                </ToolBarContent>
+                       <ColGroup>
+                        <col />
+                        <col />
+                        <col />
+                        <col />
+                        <col style="width:0px;" />
+                        </ColGroup>
+                <HeaderContent>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ScanningCodeDTO, object>(x => x.BarCodeType)">@Localizer["BarCode Type"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ScanningCodeDTO, object>(x => x.BarCodePrefix)">@Localizer["BarCode Prefix"]</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ScanningCodeDTO, object>(x => x.BarCodeSuffix)">@Localizer["BarCode Suffix"]</MudTableSortLabel></MudTh>
+                    <MudTh></MudTh>
+              </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="@Localizer["BarCodeType"]"><MudHighlighter Text="@context.BarCodeType" HighlightedText="@_searchString" /> </MudTd>
+                    <MudTd DataLabel="@Localizer["BarCodePrefix"]">@context.BarCodePrefix</MudTd>
+                    <MudTd DataLabel="@Localizer["BarCodeSuffix"]">@context.BarCodeSuffix</MudTd>
+
+                    <MudTd Style="text-align: right">
+                        <MudButton Variant="Variant.Filled"
+                               DisableElevation="true"
+                               StartIcon="@Icons.Material.Filled.SaveAlt"
+                               IconColor="Color.Dark"
+                               Size="Size.Small"
+                               OnClick="(() => SendCode(context))"
+                               Color="Color.Surface"
+                               Style="font-weight: bolder;">
+                                @Localizer["Enregistrer"]
+                            </MudButton>
+                    </MudTd>
+                </RowTemplate>
+
+                <RowEditingTemplate>
+                    <MudTd DataLabel="@Localizer["BarCodeType"]">
+                        <MudTextField Disabled @bind-Value="@context.BarCodeType" />
+                    </MudTd>
+                    <MudTd DataLabel="@Localizer["BarCodePrefix"]">
+                        <MudTextField Required @bind-Value="@context.BarCodePrefix"/>
+                    </MudTd>
+                    <MudTd DataLabel="@Localizer["BarCodeSuffix"]">
+                        <MudTextField Required @bind-Value="@context.BarCodeSuffix" />
+                    </MudTd>
+                </RowEditingTemplate>
+
+             @*   <FooterContent>
+                    <MudSwitch @bind-Checked="@_dense" Color="Color.Secondary" Style="margin-left: 5px;">@Localizer["Dense"]</MudSwitch>
+                    <MudSwitch @bind-Checked="@_striped" Color="Color.Tertiary" Style="margin-left: 5px;">@Localizer["Rayée"]</MudSwitch>
+                    <MudSwitch @bind-Checked="@_bordered" Color="Color.Primary" Style="margin-left: 5px;">@Localizer["Bordures"]</MudSwitch>
+                </FooterContent>*@
+            </MudTable>
+        
+    </MudTabPanel>
+</MudTabs>

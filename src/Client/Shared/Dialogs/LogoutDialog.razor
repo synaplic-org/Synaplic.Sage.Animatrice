@@ -1,0 +1,70 @@
+﻿@using Uni.Scan.Shared.Constants.Application
+@using Microsoft.AspNetCore.SignalR.Client
+@namespace Uni.Scan.Client.Shared.Dialogs
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Logout" Class="mr-3 mb-n1"/>
+            @Localizer["Logout !"]
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText>@ContentText</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@Localizer["Cancel"]</MudButton>
+        <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Submit">@ButtonText</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public HubConnection HubConnection { get; set; }
+
+    [Parameter]
+    public string ContentText { get; set; }
+
+    [Parameter]
+    public string ButtonText { get; set; }
+
+    [Parameter]
+    public Color Color { get; set; }
+
+    [Parameter]
+    public string CurrentUserId { get; set; }
+
+    async Task Submit()
+    {
+        if (HubConnection != null && HubConnection.State == HubConnectionState.Connected)
+        {
+            try
+            {
+                await HubConnection.SendAsync(ApplicationConstants.SignalR.OnDisconnect, CurrentUserId);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+
+        try
+        {
+            await _authenticationManager.Logout();
+            _navigationManager.NavigateTo("/login");
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            _snackBar.Add(e.Message, Severity.Error);
+            await Task.Delay(3000);
+            _navigationManager.NavigateTo(_navigationManager.Uri, forceLoad: true);
+        }
+    }
+
+    void Cancel() => MudDialog.Cancel();
+}

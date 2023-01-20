@@ -1,0 +1,170 @@
+﻿@using Uni.Scan.Transfer.DataModel
+@using Uni.Scan.Client.Pages.Stock
+@using _Imports = MudBlazor._Imports
+
+
+<MudDialog Style="">
+    <TitleContent>
+        @{
+            <MudText Typo="Typo.h6">
+                <MudIcon Icon="@Icons.Material.Filled.QrCode2" Class="mr-3 mb-n1" />
+                @if (Model.Id == 0)
+                {
+                    @Localizer["Creation Label"]
+                }
+                else
+                {
+                    @Localizer["Modification Label"]
+                }
+
+            </MudText>
+        }
+    </TitleContent>
+    <DialogContent>
+        <div style="@(_global.IsMobileView ? "max-height:calc(100vh - 110px); height: calc(100vh - 110px); overflow-y: auto;" : "") ">
+
+
+            <MudGrid Spacing="1" Style="Width:100%">
+                <MudItem md="12" sm="12" xs="12">
+                    <MudTextField For="@(() => Model.ProductId)" @bind-Value="Model.ProductId" Label="@Localizer["ID Produit"]"
+                                  ReadOnly="@(Model.Type == LabelType.Linked || Model.Id > 0)" />
+                </MudItem>
+                <MudItem md="@(Model.Type == LabelType.Linked ? 6 :12)" sm="12" xs="12">
+                    <MudTextField For="@(() => Model.IdentifiedStock)" @bind-Value="Model.IdentifiedStock" Label="@Localizer["Lot"]"
+                                  ReadOnly="@(Model.Type == LabelType.Linked || Model.Id > 0)" />
+                </MudItem>
+                @if (Model.Type == LabelType.Linked)
+                {
+                    <MudItem md="6" sm="12" xs="12">
+                        <MudTextField For="@(() => Model.SupplierIdentifiedStock)" @bind-Value="Model.SupplierIdentifiedStock" Label="@Localizer["Lot fournisseur"]" />
+                    </MudItem>
+                    <MudItem md="6" sm="12" xs="12">
+                        <MudTextField For="@(() => Model.ExpirationDate)" @bind-Value="Model.ExpirationDate" Label="@Localizer["Date expiration"]" />
+                    </MudItem>
+                    <MudItem md="6" sm="12" xs="12">
+                        <MudTextField For="@(() => Model.ProductionDate)" @bind-Value="Model.ProductionDate" Label="@Localizer["Date production"]" />
+                    </MudItem>
+                }
+                <MudItem md="4" sm="12" xs="12">
+                    <MudTextField For="@(() => Model.ProductionOrdre)" @bind-Value="Model.ProductionOrdre" Label="@Localizer["Demande production"]" />
+                </MudItem>
+                <MudItem md="4" sm="6" xs="6">
+                    <MudTextField For="@(() => Model.FabricationOrdre)" @bind-Value="Model.FabricationOrdre" Label="@Localizer["Ordre Fabrication"]" />
+                </MudItem>
+              
+                <MudItem md="4" sm="6" xs="6">
+                    <MudTextField For="@(() => Model.TransferOrdre)" @bind-Value="Model.TransferOrdre" Label="@Localizer["Ordre Transfert"]" />
+                </MudItem>
+                <MudItem md="4" sm="6" xs="6">
+                    <MudNumericField For="@(() => Model.PlanQuantity)" @bind-Value="Model.PlanQuantity" HideSpinButtons="true" Culture="_global.CustomCulture"
+                                     Format="@_global.QteFormat" Label="@(Localizer["Quantité "] + Model.QuatityUnite)" />
+                </MudItem>
+                <MudItem md="4" sm="6" xs="6">
+                    <MudNumericField For="@(() => Model.QuatityOnLabel)" @bind-Value="Model.QuatityOnLabel" HideSpinButtons="true" Culture="_global.CustomCulture"
+                                     Format="@_global.QteFormat" Label="@(Localizer["Colisage "] + Model.QuatityUnite)" />
+                </MudItem>
+                <MudItem md="4" sm="6" xs="6">
+                    <MudNumericField For="@(() => Model.TareDecimal)" @bind-Value="Model.TareDecimal" HideSpinButtons="true" Culture="_global.CustomCulture"
+                                     Format="@_global.QteFormat" Label="@(Localizer["Tare "] + Model.QuatityUnite)" />
+                </MudItem>
+
+            </MudGrid>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" OnClick="Cancel">@Localizer["Annuler"]</MudButton>
+        @{
+            <MudButton Variant="Variant.Filled" OnClick="SaveAsync" Color="Color.Success">@Localizer["Enregistrer"]</MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+
+
+@code {
+
+    [Inject] private ILogisticLabelClient _LogisticLabelClient { get; set; }
+
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public LogisticTaskLabelDTO2 Model { get; set; } = new();
+
+
+
+    void Cancel() => MudDialog.Cancel();
+
+
+    public static async Task<bool> ShowDialogAsync(IDialogService dialogService, LogisticTaskLabelDTO2 dto, bool isMobile = false)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add(nameof(LogisticLabelDialog.Model), dto);
+
+        var options = new DialogOptions { FullScreen = false, FullWidth = true, DisableBackdropClick = true, CloseButton = true };
+        if (isMobile)
+        {
+            options = new DialogOptions { FullScreen = true, FullWidth = true, DisableBackdropClick = true };
+
+        }
+
+        var dialog = await dialogService.ShowAsync<LogisticLabelDialog>("LABEL", parameters, options);
+        var result = await dialog.Result;
+        return !result.Cancelled;
+
+    }
+
+    public static async Task<bool> ShowDialogAsync(IDialogService dialogService, bool isMobile = false)
+    {
+        var dto = new LogisticTaskLabelDTO2()
+            {
+                Type = LabelType.Free,
+                QuatityOnLabel = 1
+            };
+        var parameters = new DialogParameters();
+        parameters.Add(nameof(LogisticLabelDialog.Model), dto);
+
+        var options = new DialogOptions { FullScreen = false, FullWidth = true, DisableBackdropClick = true, CloseButton = true };
+        if (isMobile)
+        {
+            options = new DialogOptions { FullScreen = true, FullWidth = true, DisableBackdropClick = true };
+
+        }
+        var dialog = await dialogService.ShowAsync<LogisticLabelDialog>("LABEL", parameters, options);
+        var result = await dialog.Result;
+        return !result.Cancelled;
+
+    }
+
+
+
+
+    private async Task SaveAsync()
+    {
+        _global.IsLoading = true;
+
+        try
+        {
+            var myresponse = await _LogisticLabelClient.SaveLabelAsync(Model);
+            if (myresponse.Succeeded)
+            {
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                await _dialogService.ShowErrors(myresponse.Messages);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            _snackBar.Add(Localizer["Vous êtes hors ligne !"]);
+        }
+        catch (Exception e)
+        {
+            await _dialogService.ShowErrors(e);
+        }
+
+        _global.IsLoading = false;
+
+
+    }
+
+}

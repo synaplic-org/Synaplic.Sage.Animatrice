@@ -1,0 +1,354 @@
+﻿@using Mapster;
+@using Uni.Scan.Transfer.DataModel;
+@using Uni.Scan.Client.Infrastructure.ApiClients;
+
+
+
+
+
+<style>
+    .footerbar {
+        border-top: solid 1px #4e85c4ff;
+        background: #f0f9f1 !important;
+    }
+</style>
+
+<EditForm Model="@stockanomalyDTO">
+    <FluentValidationValidator @ref="_fluentValidationValidator" />
+    <MudDialog>
+        <TitleContent>
+          
+            
+            @if (_global.IsMobileView)
+            {
+                @if (stockanomalyDTO.Id == 0)
+                {
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Add" Class="mr-3 mb-n1" />
+                        @Localizer["Créer une anomalie"]
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.RemoveRedEye" Class="mr-3 mb-n1" />
+                        @Localizer["Voir les détails de l'anomalie"]
+                    </MudText>
+                }
+            }
+            else 
+            {
+                 @if (stockanomalyDTO.Id == 0)
+                {
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Add" Class="mr-3 mb-n1" />
+                        @Localizer["Créer une anomalie"]
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Update" Class="mr-3 mb-n1" />
+                        @Localizer["Mettre a jour une anomalie"]
+                    </MudText>
+                }
+            }
+
+
+               
+
+            
+
+        </TitleContent>
+        <DialogContent>
+
+
+            @if (_global.IsMobileView)
+            {
+                @if (stockanomalyDTO.Id == 0)
+                {
+
+                    <div style="max-height:calc(100vh - 110px); height: calc(100vh - 110px);  overflow-y: auto;">
+                        <MudTextField For="@(() => stockanomalyDTO.ProductID)"
+                              @bind-Value="stockanomalyDTO.ProductID" Label="@Localizer["Produit"]"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.Grid3x3" AdornmentColor="Color.Secondary" />
+
+                        <MudTextField For="@(() => stockanomalyDTO.LogisticsArea)"
+                              @bind-Value="stockanomalyDTO.LogisticsArea" Label="@Localizer["Zone"]"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.Map" AdornmentColor="Color.Secondary" />
+
+                        <MudTextField For="@(() => stockanomalyDTO.IdentifiedStockID)"
+                              @bind-Value="stockanomalyDTO.IdentifiedStockID" Label="@Localizer["Lot"]"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.Widgets" AdornmentColor="Color.Secondary" />
+                        <MudNumericField For="@(() => stockanomalyDTO.Quantity)"
+                                 @bind-Value="stockanomalyDTO.Quantity" Label="@Localizer["Quantité"]" Culture="_global.CustomCulture"
+                                 Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.Widgets" AdornmentColor="Color.Secondary" />
+
+
+                        <MudSelect @bind-Value="stockanomalyDTO.AnomalyType" Label="@Localizer["Sélectionner un type"]">
+                            <MudSelectItem Value="AnomalyType.Produit_Introuvable" />
+                            <MudSelectItem Value="AnomalyType.Lot_Quantite_Erronee" />
+                            <MudSelectItem Value="AnomalyType.Lot_Erronee" />
+                            <MudSelectItem Value="AnomalyType.Quantite_Erronee" />
+                            <MudSelectItem Value="AnomalyType.Produit_Trouve" />
+                        </MudSelect>
+
+                        @if (stockanomalyDTO.AnomalyType == AnomalyType.Lot_Quantite_Erronee)
+                        {
+                            <MudItem xs="12" Class="mt-3">
+                                <MudTextField Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedQuantity)" @bind-Value="@stockanomalyDTO.CorrectedQuantity" Label="@Localizer["Quantité Corrigée"]" />
+                            </MudItem>
+                            <MudItem xs="12" Class="mt-1">
+                                <MudTextField Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedIdentifiedStockID)" @bind-Value="@stockanomalyDTO.CorrectedIdentifiedStockID" Label="@Localizer["Lot Corrigée"]" />
+                            </MudItem>
+                        }
+                        else if (stockanomalyDTO.AnomalyType == AnomalyType.Lot_Erronee)
+                        {
+                            <MudItem xs="12" Class="mt-1">
+                                <MudTextField Required Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedIdentifiedStockID)" @bind-Value="@stockanomalyDTO.CorrectedIdentifiedStockID" Label="@Localizer["Lot Corrigée"]" />
+                            </MudItem>
+                        }
+                        else if (stockanomalyDTO.AnomalyType == AnomalyType.Quantite_Erronee)
+                        {
+                            <MudItem xs="12" Class="mt-1">
+                                <MudTextField Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedQuantity)" @bind-Value="@stockanomalyDTO.CorrectedQuantity" Label="@Localizer["Quantité Corrigée"]" />
+                            </MudItem>
+                        }
+                        else if (stockanomalyDTO.AnomalyType == AnomalyType.Produit_Trouve)
+                        {
+                            <MudItem xs="12" Class="mt-1">
+                                <MudTextField Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedQuantity)" @bind-Value="@stockanomalyDTO.CorrectedQuantity" Label="@Localizer["Quantité Corrigée"]" />
+                            </MudItem>
+                        }
+                    </div>
+                }
+                else
+                {
+
+                    <div style="max-height:calc(100vh - 110px); height: calc(100vh - 110px); overflow-y: auto;">
+                        <MudTextField Disabled For="@(() => stockanomalyDTO.ProductID)"
+                              @bind-Value="stockanomalyDTO.ProductID" Label="@Localizer["Produit"]"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.Grid3x3" AdornmentColor="Color.Secondary" />
+
+                        <MudTextField Disabled For="@(() => stockanomalyDTO.LogisticsArea)"
+                              @bind-Value="stockanomalyDTO.LogisticsArea" Label="@Localizer["Zone"]"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.Map" AdornmentColor="Color.Secondary" />
+
+                        <MudTextField Disabled For="@(() => stockanomalyDTO.IdentifiedStockID)"
+                              @bind-Value="stockanomalyDTO.IdentifiedStockID" Label="@Localizer["Lot"]"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.Widgets" AdornmentColor="Color.Secondary" />
+                        <MudNumericField Disabled For="@(() => stockanomalyDTO.Quantity)"
+                                 @bind-Value="stockanomalyDTO.Quantity" Label="@Localizer["Quantité"]" Culture="_global.CustomCulture"
+                                 Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.Widgets" AdornmentColor="Color.Secondary" />
+                        <MudTextField Disabled For="@(() => stockanomalyDTO.AnomalyStatus)"
+                              @bind-Value="stockanomalyDTO.AnomalyStatus" Label="@Localizer["Statut"]"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.Info" AdornmentColor="Color.Secondary" />
+
+                        <MudSelect Disabled @bind-Value="stockanomalyDTO.AnomalyType" Label="@Localizer["Sélectionner un type"]">
+                            <MudSelectItem Value="AnomalyType.Produit_Introuvable" />
+                            <MudSelectItem Value="AnomalyType.Lot_Quantite_Erronee" />
+                            <MudSelectItem Value="AnomalyType.Lot_Erronee" />
+                            <MudSelectItem Value="AnomalyType.Quantite_Erronee" />
+                            <MudSelectItem Value="AnomalyType.Produit_Trouve" />
+                        </MudSelect>
+                        @if (stockanomalyDTO.AnomalyType == AnomalyType.Lot_Quantite_Erronee)
+                        {
+                            <MudItem xs="12" Class="mt-3">
+                                <MudTextField Disabled Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedQuantity)" @bind-Value="@stockanomalyDTO.CorrectedQuantity" Label="@Localizer["Quantité Corrigée"]" />
+                            </MudItem>
+                            <MudItem xs="12" Class="mt-1">
+                                <MudTextField Disabled Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedIdentifiedStockID)" @bind-Value="@stockanomalyDTO.CorrectedIdentifiedStockID" Label="@Localizer["Lot Corrigée"]" />
+                            </MudItem>
+                        }
+                        else if (stockanomalyDTO.AnomalyType == AnomalyType.Lot_Erronee)
+                        {
+                            <MudItem xs="12" Class="mt-1">
+                                <MudTextField Disabled Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedIdentifiedStockID)" @bind-Value="@stockanomalyDTO.CorrectedIdentifiedStockID" Label="@Localizer["Lot Corrigée"]" />
+                            </MudItem>
+                        }
+                        else if (stockanomalyDTO.AnomalyType == AnomalyType.Quantite_Erronee)
+                        {
+                            <MudItem xs="12" Class="mt-1">
+                                <MudTextField Disabled Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedQuantity)" @bind-Value="@stockanomalyDTO.CorrectedQuantity" Label="@Localizer["Quantité Corrigée"]" />
+                            </MudItem>
+                        }
+                        else if (stockanomalyDTO.AnomalyType == AnomalyType.Produit_Trouve)
+                        {
+                            <MudItem xs="12" Class="mt-1">
+                                <MudTextField Disabled Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedQuantity)" @bind-Value="@stockanomalyDTO.CorrectedQuantity" Label="@Localizer["Quantité Corrigée"]" />
+                            </MudItem>
+                        }
+                    </div>
+                }
+
+            }
+            else
+            {
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Variant="Variant.Outlined" For="@(() => stockanomalyDTO.ProductID)" @bind-Value="stockanomalyDTO.ProductID" Label="@Localizer["Produit"]" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Variant="Variant.Outlined" For="@(() => stockanomalyDTO.LogisticsArea)" @bind-Value="stockanomalyDTO.LogisticsArea" Label="@Localizer["Zone"]" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Variant="Variant.Outlined" For="@(() => stockanomalyDTO.IdentifiedStockID)" @bind-Value="stockanomalyDTO.IdentifiedStockID" Label="@Localizer["Lot"]" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                            <MudTextField Variant="Variant.Outlined" For="@(() => stockanomalyDTO.Quantity)" @bind-Value="stockanomalyDTO.Quantity" Label="@Localizer["Quantité"]" />
+                    </MudItem>
+                    
+
+                    <MudItem xs="12">
+                        <MudSelect @bind-Value="stockanomalyDTO.AnomalyType" Label="@Localizer["Sélectionner un type"]">
+                            <MudSelectItem Value="AnomalyType.Produit_Introuvable" />
+                            <MudSelectItem Value="AnomalyType.Lot_Quantite_Erronee" />
+                            <MudSelectItem Value="AnomalyType.Lot_Erronee" />
+                            <MudSelectItem Value="AnomalyType.Quantite_Erronee" />
+                            <MudSelectItem Value="AnomalyType.Produit_Trouve" />
+                        </MudSelect>
+                    </MudItem>
+                    @if (stockanomalyDTO.AnomalyType == AnomalyType.Lot_Quantite_Erronee)
+                    {
+                        <MudItem xs="12" Class="mt-3">
+                            <MudTextField Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedQuantity)" @bind-Value="@stockanomalyDTO.CorrectedQuantity" Label="@Localizer["Quantité Corrigée"]" />
+                        </MudItem>
+                        <MudItem xs="12" Class="mt-1">
+                            <MudTextField Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedIdentifiedStockID)" @bind-Value="@stockanomalyDTO.CorrectedIdentifiedStockID" Label="@Localizer["Lot Corrigée"]" />
+                        </MudItem>
+                    }
+                    else if (stockanomalyDTO.AnomalyType == AnomalyType.Lot_Erronee)
+                    {
+                        <MudItem xs="12" Class="mt-1">
+                            <MudTextField Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedIdentifiedStockID)" @bind-Value="@stockanomalyDTO.CorrectedIdentifiedStockID" Label="@Localizer["Lot Corrigée"]" />
+                        </MudItem>
+                    }
+                    else if (stockanomalyDTO.AnomalyType == AnomalyType.Quantite_Erronee)
+                    {
+                        <MudItem xs="12" Class="mt-1">
+                            <MudTextField Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedQuantity)" @bind-Value="@stockanomalyDTO.CorrectedQuantity" Label="@Localizer["Quantité Corrigée"]" />
+                        </MudItem>
+                    }
+                    else if (stockanomalyDTO.AnomalyType == AnomalyType.Produit_Trouve)
+                    {
+                        <MudItem xs="12" Class="mt-1">
+                            <MudTextField Variant="Variant.Outlined" For="@(() => stockanomalyDTO.CorrectedQuantity)" @bind-Value="@stockanomalyDTO.CorrectedQuantity" Label="@Localizer["Quantité Corrigée"]" />
+                        </MudItem>
+                    }
+                </MudGrid>
+            }
+        </DialogContent>
+
+        <DialogActions>
+            @if (_global.IsMobileView)
+            {
+                @if (stockanomalyDTO.Id != 0)
+                {
+                    <MudButton DisableElevation Style="width:100%" Variant="Variant.Filled" OnClick="Cancel">@Localizer["Fermer"]</MudButton>
+
+                }
+                else
+                {
+                    <MudButton DisableElevation Style="width:100%" Variant="Variant.Filled" OnClick="Cancel">@Localizer["Fermer"]</MudButton>
+                    <MudButton DisableElevation Style="width:100%" Variant="Variant.Filled" OnClick="@(() => SaveAsync())" Disabled="@(!Validated())" Color="Color.Success">@Localizer["Enregistrer"]</MudButton>
+                }
+            }
+            else
+            {
+                <MudButton DisableElevation Style="width:100%" Variant="Variant.Filled" OnClick="Cancel">@Localizer["Fermer"]</MudButton>
+
+                @if (stockanomalyDTO.Id != 0)
+                {
+                    <MudButton DisableElevation Style="width:100%" Variant="Variant.Filled" OnClick="@(() => SaveAsync())" Disabled="@(!Validated())" Color="Color.Secondary">@Localizer["Mettre a jour"]</MudButton>
+                }
+                else
+                {
+                    <MudButton DisableElevation Style="width:100%" Variant="Variant.Filled" OnClick="@(() => SaveAsync())" Disabled="@(!Validated())" Color="Color.Success">@Localizer["Enregistrer"]</MudButton>
+                }
+            }
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+
+
+@code {
+
+    [Inject] private IStockAnomalyClient anomalyClient { get; set; }
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; }
+    [Parameter] public StockAnomalyDTO stockanomalyDTO { get; set; } = new();
+    private List<StockAnomalyDTO> _stockanomalyDTO { get; set; } = new();
+
+    private FluentValidationValidator _fluentValidationValidator;
+
+    private bool Validated()
+    {
+        if (string.IsNullOrEmpty(stockanomalyDTO.ProductID)) return false;
+        if (string.IsNullOrEmpty(stockanomalyDTO.IdentifiedStockID)) return false;
+
+
+        return true;
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+
+    }
+
+    public void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+    //private async void SaveAnomaly()
+    //{
+    //    try
+    //    {
+    //        var resp = await anomalyClient.SaveAnomalyAsync(stockanomalyDTO);
+    //        if (resp.Succeeded)
+    //        {
+    //            resp.Data.Adapt(stockanomalyDTO);
+    //            MudDialog.Close();
+    //        }
+    //        else
+    //        {
+    //            await _dialogService.ShowErrors(resp.Messages);
+    //        }
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        await _dialogService.ShowErrors(e);
+    //    }
+
+    //}
+    private async Task SaveAsync()
+    {
+        var response = await anomalyClient.SaveAnomalyAsync(stockanomalyDTO);
+        if (response.Succeeded)
+        {
+            if (stockanomalyDTO.Id == 0)
+            {
+                _snackBar.Add("Anomalie Enregistré", Severity.Success);
+            }
+            else
+            {
+                _snackBar.Add("Anomalie mis à jour", Severity.Info);
+            }
+
+            MudDialog.Close();
+        }
+        else
+        {
+            foreach (var message in response.Messages)
+            {
+                _snackBar.Add(message, Severity.Error);
+            }
+        }
+    }
+
+    private async Task LoadDataAsync()
+    {
+        await Task.CompletedTask;
+    }
+}

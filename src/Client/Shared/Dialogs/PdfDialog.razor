@@ -1,0 +1,34 @@
+﻿
+
+<div style="height:calc(100vh - 160px);margin-bottom: 0px">
+
+        <iframe src="@PDF64String" style="" ></iframe>
+        </div>
+ 
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public string PDF64String { get; set; }
+    
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+
+    public static async Task<DialogResult> ShowDialogAsync(IDialogService _dialogService, string Pdf64String)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add(nameof(PdfDialog.PDF64String), Pdf64String);
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            MaxWidth = MaxWidth.ExtraExtraLarge,
+            FullWidth = true,
+            DisableBackdropClick = true,
+            FullScreen = false
+        };
+        var dialog = _dialogService.Show<PdfDialog>("", parameters, options);
+        var result = await dialog.Result;
+        return result; 
+    }
+
+}

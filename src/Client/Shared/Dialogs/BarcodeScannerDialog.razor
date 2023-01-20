@@ -1,0 +1,48 @@
+﻿<style>
+    
+    #barcodeScannerElement video {
+            width: calc(100% - 10px);
+        }
+    #barcodeScannerElement canvas {
+            position: absolute;
+            z-index: 1000;
+            right: 0;
+            width: calc(100% - 10px);
+        }
+</style>
+
+ 
+    <div id="barcodeScannerElement"  style="width: 100%;   height: calc(100vh - 70px);@barcodeScannerElementStyle"></div>
+    
+ @code
+ {
+     
+     [CascadingParameter] MudDialogInstance mudDialog { get; set; }
+
+     string barcodeScannerElementStyle="";
+
+     protected override async Task OnAfterRenderAsync(bool firstRender)
+     {
+         base.OnAfterRender(firstRender);
+         if (firstRender)
+         {
+             await InitializeBarcodeScanner();
+         }
+     }
+     private async Task InitializeBarcodeScanner()
+     {
+         barcodeScannerElementStyle = string.Empty;
+         var dotNetObjectReference = DotNetObjectReference.Create(this);
+         await _jsRuntime.InvokeVoidAsync("InitBarcodeScanner", dotNetObjectReference);
+
+     }
+
+     [JSInvokable]
+     public async Task OnDetected(string isbn)
+     {
+     //barcodeScannerElementStyle = "display:none; width: 100%; height: 100%";
+         mudDialog.Close(isbn);
+     }
+ }
+
+

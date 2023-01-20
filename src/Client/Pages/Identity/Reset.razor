@@ -1,0 +1,67 @@
+﻿@page "/account/reset-password/"
+@layout MainLayout
+@attribute [AllowAnonymous]
+ 
+
+
+
+<MudAppBar Elevation="5" Dense="true" Style="border-top: solid 2px #7398c1;">
+
+    <MudIcon Icon="@Icons.Material.Filled.QrCode2"></MudIcon>
+    <MudText Typo="Typo.h6" Class="ml-2">UNI=SCAN  </MudText>
+    <MudText Typo="Typo.caption" Class="ml-2">V 1.1</MudText>
+
+
+    <MudSpacer />
+
+
+    @*<MudIconButton   Icon="@Icons.Material.Filled.Settings" Size="Size.Medium" Style="color:#85c3f4;padding: 5px;border: solid" Edge="Edge.Start" />*@
+</MudAppBar>
+
+
+<div style=" background-image: url(images/mar-pattern.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: right bottom;background-color:#eef3f6f2;padding-top: 50px	">
+
+
+
+    <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center" Style="height: calc(100vh - 50px);">
+        <MudPaper Elevation="9" Class="pa-8 rounded-xl">
+
+            <EditForm Model="@_resetPasswordModel" OnValidSubmit="SubmitAsync">
+                <FluentValidationValidator @ref="_fluentValidationValidator" />
+                <MudGrid>
+                    <MudItem xs="12">
+                        <div class="d-flex justify-center">
+                            @*<MudIcon Icon="@CustomIcons.Uni" Color="Color.Primary" Size="Size.Large" ViewBox="0 0 500 500" Style="width: 100px; height: 100px;" />*@
+                        </div>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <div class="d-flex justify-center">
+                            <MudText Typo="Typo.h4">@Localizer["Réinitialiser le mot de passe"]</MudText>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <div class="d-flex justify-center">
+                            <MudText Typo="Typo.subtitle2" Class="mb-n4">@Localizer["Entrez votre adresse e-mail pour la réinitialisation du mot de passe"]</MudText>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField T="string" Label="@Localizer["E-mail"]" @bind-Value="_resetPasswordModel.Email" For="@(() => _resetPasswordModel.Email)" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField T="string" Label="@Localizer["Mot de passe"]" @bind-Value="_resetPasswordModel.Password" For="@(() => _resetPasswordModel.Password)" Variant="Variant.Outlined" InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon" OnAdornmentClick="TogglePasswordVisibility" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField T="string" Label="@Localizer["Confirmer le mot de passe"]" @bind-Value="_resetPasswordModel.ConfirmPassword" For="@(() => _resetPasswordModel.ConfirmPassword)" Variant="Variant.Outlined" InputType="InputType.Password" />
+                    </MudItem>
+                    <MudItem xs="12" Class="d-flex justify-center">
+                        <MudButton Variant="Variant.Filled" Disabled="@(!Validated)" Color="Color.Primary" ButtonType="ButtonType.Submit" Size="Size.Large" FullWidth="true">@Localizer["Mettre à jour le mot de passe"]</MudButton>
+                    </MudItem>
+                </MudGrid>
+            </EditForm>
+        </MudPaper>
+    </MudContainer>
+
+</div>

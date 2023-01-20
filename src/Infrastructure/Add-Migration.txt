@@ -1,0 +1,1 @@
+﻿   EntityFrameworkCore\Add-Migration -Project "Infrastructure" -StartupProject "Server" -OutputDir  Migrations "00001"

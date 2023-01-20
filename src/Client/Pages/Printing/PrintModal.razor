@@ -1,0 +1,288 @@
+﻿@using Uni.Scan.Client.Infrastructure.ApiClients
+@using Uni.Scan.Transfer.DataModel
+@inject Microsoft.Extensions.Localization.IStringLocalizer<PrintModal> Localizer
+
+@if (ModalType.Equals("Task"))
+{
+    <MudDialog>
+    <TitleContent>
+        @{
+            <MudText Typo="Typo.h6">
+                <MudIcon Icon="@Icons.Material.Filled.Print" Class="mr-3 mb-n1" />
+                @Localizer["Imprimer Tâche"]
+            </MudText>
+        }
+    </TitleContent>
+    <DialogContent>
+        <MudPaper Elevation="10" class="pa-3 mt-3" Style="border-left: solid 6px #ebcf7c">
+
+                <MudSelect @bind-Value="@labelTemplateDTO.ModelName" Style="margin:10px" T="string" Label="@Localizer["Sélectionner un Modèle"]">
+
+                    @{
+                        foreach (var e in _labelTemplateDTO)
+                        {
+                            @if (e.Type == PrintType.Task)
+                            {
+                                <MudSelectItem Value="@(@e.ModelName)">@e.ModelName</MudSelectItem>
+                            }
+                        }
+                    }
+
+
+                </MudSelect>
+                
+            
+      
+
+            <MudTable Items="_taskDetails" FixedHeader="true" Height="@(fixed_header || true ?"300px":"")"
+                      Style="margin:10px" Dense="false" Bordered="true" Breakpoint="Breakpoint.Sm"
+                      MultiSelection="true" SelectedItems=_selectedItems
+                      Loading="@_global.IsLoading" LoadingProgressColor="Color.Info" Elevation="25"
+                      Filter="new Func<LogisticTaskDetailDTO, bool>(TaskSearch)">
+
+                <ToolBarContent>
+                    <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="@Localizer["Rechercher"]" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.FilterAlt" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
+                </ToolBarContent>
+
+
+                <HeaderContent>
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskDetailDTO, object>(x => x.LineItemID)">@Localizer["Line ID"]</MudTableSortLabel></MudTh>
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskDetailDTO, object>(x => x.ProductID)">@Localizer["Produit"]</MudTableSortLabel></MudTh>
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskDetailDTO, object>(x => x.ProductDescription)">@Localizer["Description"]</MudTableSortLabel></MudTh>
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskDetailDTO, object>(x => x.IdentifiedStockID)">@Localizer["Lot"]</MudTableSortLabel></MudTh>
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskDetailDTO, object>(x => x.PlanQuantity)">@Localizer["Quantité"]</MudTableSortLabel></MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="@Localizer["Line ID"]" Style="text-align:center">@context.LineItemID</MudTd>
+        
+                   
+                    <MudTd DataLabel="@Localizer["Produit"]" Style="text-align:center"> <MudHighlighter Text="@context.ProductID" HighlightedText="@_searchString" /></MudTd>
+
+                    <MudTd DataLabel="@Localizer["Description"]" Style="text-align:center"> <MudHighlighter Text="@context.ProductDescription" HighlightedText="@_searchString" /></MudTd>
+
+                    <MudTd DataLabel="@Localizer["Lot"]" Style="text-align:center"> <MudHighlighter Text="@context.IdentifiedStockID" HighlightedText="@_searchString" /></MudTd>
+
+                    <MudTd DataLabel="@Localizer["Colisage"]" Style="text-align:center">@context.PlanQuantity.ToString("N2") @context.PlanQuantityUnitCode</MudTd>
+
+                    
+
+
+
+                </RowTemplate>
+                <FooterContent>
+                    <MudTd colspan="6">Sélectionner tout</MudTd>
+                </FooterContent>
+            </MudTable>
+        </MudPaper>
+
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" OnClick="Cancel">@Localizer["Annuler"]</MudButton>
+        @if (labelTemplateDTO.ModelName != null)
+        {
+            <MudButton Disabled="@_processing" OnClick="ProcessSomething" Variant="Variant.Filled"   Color="Color.Success">
+            @if (_processing)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Color="Color.Default" Indeterminate="true" />
+                <MudText Color="Color.Surface" Class="ms-2">
+                    @Localizer["en cours.."]
+                </MudText>
+            }
+            else
+            {
+                <MudText>
+                    @Localizer["Imprimer"]
+                </MudText>
+            }
+        </MudButton>
+        }
+        
+
+    </DialogActions>
+</MudDialog>
+
+}
+else if (ModalType.Equals("Label") || ModalType.Equals("LabelSection") || ModalType.Equals("SingleLabel"))
+{
+    <MudDialog>
+        <TitleContent>
+            @{
+                <MudText Typo="Typo.h6">
+                    <MudIcon Icon="@Icons.Material.Filled.Print" Class="mr-3 mb-n1" />
+                    @Localizer["Imprimer Étiquettes"]
+                </MudText>
+            }
+        </TitleContent>
+        <DialogContent>
+            <MudPaper Elevation="5" class="pa-3 mt-3" Style="border-left: solid 6px #74bdf0">
+
+                <MudSelect @bind-Value="@labelTemplateDTO.ModelName" T="string" Style="margin:10px" Label="@Localizer["Sélectionner un Modèle"]">
+                    @{
+                        foreach (var e in _labelTemplateDTO)
+                        {
+                            @if (e.Type == PrintType.Label )
+                            {
+                                <MudSelectItem Value="@(@e.ModelName)">@e.ModelName</MudSelectItem>
+
+                            }
+                        }
+                    }
+                </MudSelect>
+
+
+                <MudTable Items="_logisticTaskLabelDTO" FixedHeader="true" Height="@(fixed_header || true ?"300px":"")"
+                      Dense="false" Bordered="true" Breakpoint="Breakpoint.Sm" @bind-SelectedItems=_selectedLabels MultiSelection="true"
+                      Loading="@_global.IsLoading" LoadingProgressColor="Color.Info" Elevation="25" Style="margin:10px"
+                      Filter="new Func<LogisticTaskLabelDTO, bool>(LabelSearch)">
+
+                    <ToolBarContent>
+                        <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="@Localizer["Rechercher"]" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.FilterAlt" IconSize="Size.Medium"></MudTextField>
+                    </ToolBarContent>
+
+
+                    <HeaderContent>
+                        <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x => x.ProductId)">@Localizer["Produit"]</MudTableSortLabel></MudTh>
+                        <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x => x.ProductName)">@Localizer["Description"]</MudTableSortLabel></MudTh>
+                        <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x => x.IdentifiedStock)">@Localizer["Lot"]</MudTableSortLabel></MudTh>
+                        <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x => x.QuatityOnLabel)">@Localizer["Colisage"]</MudTableSortLabel></MudTh>
+                        <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x => x.NbrEtiquettes)">@Localizer["Nombre d'Étiquettes"]</MudTableSortLabel></MudTh>
+                        <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x => x.Duplicata)">@Localizer["Nombre Duplicata"]</MudTableSortLabel></MudTh>
+                        <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x => x.Supplement)">@Localizer["Supplément"]</MudTableSortLabel></MudTh>
+
+                    </HeaderContent>
+
+                    <RowTemplate>
+
+                        <MudTd DataLabel="@Localizer["Produit"]" Style="text-align:center"><MudHighlighter Text="@context.ProductId" HighlightedText="@_searchString" /></MudTd>
+
+                        <MudTd DataLabel="@Localizer["Désignation"]" Style="text-align:center"><MudHighlighter Text="@context.ProductName" HighlightedText="@_searchString" /></MudTd>
+
+                        <MudTd DataLabel="@Localizer["Lot"]" Style="text-align:center"><MudHighlighter Text="@context.IdentifiedStock" HighlightedText="@_searchString" /></MudTd>
+
+                        <MudTd DataLabel="@Localizer["Colisage"]" Style="text-align:center">@context.QuatityOnLabel.ToString("N2") @context.QuatityUnite</MudTd>
+
+                        <MudTd DataLabel="@Localizer["Nombre d'Étiquettes"]" Style="text-align:center">@context.NbrEtiquettes</MudTd>
+
+                        <MudTd DataLabel="@Localizer["Nombre Duplicata"]" Style="text-align:center">@context.Duplicata</MudTd>
+                        <MudTd DataLabel="@Localizer["Supplément"]">
+                            <MudNumericField Min="0" @bind-Value="@context.Supplement" Culture="_global.CustomCulture" />
+                        </MudTd>
+
+                    </RowTemplate>
+                    
+                    <FooterContent>
+                        <MudTd colspan="7">Sélectionner tout</MudTd>
+                    </FooterContent>
+                </MudTable>
+            </MudPaper>
+
+        </DialogContent>
+        <DialogActions>
+            <MudButton Variant="Variant.Filled" OnClick="Cancel">@Localizer["Annuler"]</MudButton>
+            @if (labelTemplateDTO.ModelName != null)
+            {
+                <MudButton Disabled="@_processing" OnClick="ProcessSomething" Variant="Variant.Filled" Color="Color.Success">
+
+                    @if (_processing)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Color="Color.Default" Indeterminate="true" />
+                        <MudText Color="Color.Surface" Class="ms-2">@Localizer["en cours.."]</MudText>
+                    }
+                    else
+                    {
+                        <MudText>@Localizer["Imprimer"]</MudText>
+                    }
+                </MudButton>
+            }
+
+
+        </DialogActions>
+    </MudDialog>
+
+}
+else if(ModalType.Equals("Area"))
+{
+    <MudDialog>
+        <TitleContent>
+            @{
+                <MudText Typo="Typo.h6">
+                    <MudIcon Icon="@Icons.Material.Filled.Print" Class="mr-3 mb-n1" />
+                    @Localizer["Imprimer Étiquette Zone"]
+                </MudText>
+            }
+        </TitleContent>
+        <DialogContent>
+            <MudPaper Elevation="5" class="pa-3 mt-3" Style="border-left: solid 6px red">
+
+                <MudSelect @bind-Value="@labelTemplateDTO.ModelName" T="string" Style="margin:10px" Label="@Localizer["Sélectionner un Modèle"]">
+                    @{
+                        foreach (var e in _labelTemplateDTO)
+                        {
+                            @if (e.Type == PrintType.Area)
+                            {
+                                <MudSelectItem Value="@(@e.ModelName)">@e.ModelName</MudSelectItem>
+
+                            }
+                        }
+                    }
+                </MudSelect>
+
+
+                <MudTable  Items="@Elements" FixedHeader="true" Height="@(fixed_header || true ?"300px":"")"
+                      Dense="false" Bordered="true" Breakpoint="Breakpoint.Sm"  MultiSelection="true"
+                      Loading="@_global.IsLoading" LoadingProgressColor="Color.Info" Elevation="25" Style="margin:10px"
+                      Filter="new Func<LogisticAreaDTO, bool>(AreaSearch)">
+
+                    <ToolBarContent>
+                        <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="@Localizer["Rechercher"]" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.FilterAlt" IconSize="Size.Medium"></MudTextField>
+                    </ToolBarContent>
+
+
+                    <HeaderContent>
+                        <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticAreaDTO, object>(x => x.LogisticAreaID)">@Localizer["Zone"]</MudTableSortLabel></MudTh>
+                        <MudTh Style="text-align:center; font-weight: bolder;">@Localizer["Location"]</MudTh>
+                        <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticAreaDTO, object>(x => x.TypeCodeText)">@Localizer["Type Code"]</MudTableSortLabel></MudTh>
+                    </HeaderContent>
+
+                    <RowTemplate>
+
+                        <MudTd DataLabel="@Localizer["Zone"]" Style="text-align:center"><MudHighlighter Text="@context.LogisticAreaID" HighlightedText="@_searchString" /></MudTd>
+
+                        <MudTd DataLabel="@Localizer["Location"]" Style="text-align:center"> @context.SiteID / @context.InventoryManagedLocationID</MudTd>
+
+                        <MudTd DataLabel="@Localizer["Type Code"]" Style="text-align:center"><MudHighlighter Text="@context.TypeCodeText" HighlightedText="@_searchString" /></MudTd>
+
+                    </RowTemplate>
+
+                    <FooterContent>
+                        <MudTd colspan="3" >Sélectionner tout</MudTd>
+                    </FooterContent>
+                </MudTable>
+            </MudPaper>
+
+        </DialogContent>
+        <DialogActions>
+            <MudButton Variant="Variant.Filled" OnClick="Cancel">@Localizer["Annuler"]</MudButton>
+            @if (labelTemplateDTO.ModelName != null)
+            {
+                <MudButton Disabled="@_processing" OnClick="ProcessSomething" Variant="Variant.Filled" Color="Color.Success">
+
+                    @if (_processing)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Color="Color.Default" Indeterminate="true" />
+                        <MudText Color="Color.Surface" Class="ms-2">@Localizer["en cours.."]</MudText>
+                    }
+                    else
+                    {
+                        <MudText>@Localizer["Imprimer"]</MudText>
+                    }
+            </MudButton>
+}
+
+
+        </DialogActions>
+    </MudDialog>
+}
+

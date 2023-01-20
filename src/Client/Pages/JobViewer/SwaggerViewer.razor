@@ -1,0 +1,19 @@
+﻿@page "/swagger-viewer"
+@attribute [Authorize(Policy = Permissions.Infrastructure.Swagger)]
+ 
+
+<MudPaper Elevation="9">
+    <iframe style="height: calc(100vh - 70px); overflow-y: scroll;padding: 5px" 
+            src="/swagger/index.html" 
+            frameborder="0"></iframe></MudPaper>
+            
+            
+@code
+{
+
+    protected override async Task OnInitializedAsync()
+    {
+        _global.CurrentTitle = Localizer["API DEFINITION"];
+        await Task.Delay(1);
+    }
+}

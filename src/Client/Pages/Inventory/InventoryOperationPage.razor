@@ -1,0 +1,182 @@
+﻿@page "/Inventory/Operation/{ObjectId}"
+@using System.Net.Http.Json
+@using Uni.Scan.Client.Infrastructure.ApiClients
+@using Uni.Scan.Transfer.DataModel
+@using static MudBlazor.CategoryTypes
+@layout NoAppBarLayout
+
+
+<style>
+
+
+    tbody tr:nth-child(odd) { background-color: #fff; }
+
+    tbody tr:nth-child(even) { background-color: #fff; }
+
+    .mud-table-cell {
+        font-weight: bold;
+        font-size: small;
+    }
+
+    .mud-table-sort-label {
+        font-weight: bolder;
+        font-size: medium;
+    }
+
+    .mud-badge-unsigned {
+        background-color: #ebcf7c;
+        color: white;
+    }
+	 
+</style>
+
+@if (_global.IsMobileView)
+{
+    <MudAppBar Elevation="5" Dense="true" Style="border-top: solid 2px #7398c1;">
+
+
+        <MudText Typo="Typo.h6" Class="ml-2">@Localizer["Inventaire"] : @(_inventoryTask?.Number) </MudText>
+
+        <MudSpacer/>
+
+        <MudIconButton Disabled="_global.IsLoading" Icon="@Icons.Material.Filled.DoneAll" Size="Size.Medium" Style="background: #4083e7;color: #ffffff; padding: 5px;border: solid" Edge="Edge.Start"
+                       OnClick="Save" />
+
+        @*<MudIconButton Disabled="_global.IsLoading" Variant="Variant.Filled" Icon="@Icons.Material.Filled.SaveAs" Size="Size.Medium" Style="color: #00b7fd; padding: 5px; border: solid" Edge="Edge.Start"
+                       OnClick="Save"/>*@
+    </MudAppBar>
+@*    <div style="margin-top: 50px"></div>*@
+
+@*<div style="margin-top: 50px"></div>*@
+}
+else
+{
+@*    <div style="margin-top: 50px"></div>*@
+    <MudTextField @bind-Value="_searchString" Immediate="true" Clearable="true" FullWidth="true" Placeholder="@Localizer["Search"]"
+                  AdornmentIcon="@Icons.Material.Filled.FilterAlt" Adornment="Adornment.Start" Class="mx-6 mb-5">
+    </MudTextField>
+}
+
+
+
+
+
+@*
+<MudPaper Elevation="3" Style="margin-bottom:5px;">
+
+
+    <div class="mud-toolbar mud-toolbar-gutters mud-table-toolbar" style="border-left:10px  #d04512">
+        <MudIconButton DisableElevation Variant="Variant.Outlined" Icon="@Icons.Material.Filled.QrCode" Color="Color.Primary" OnClick="OpenScanner" Style="margin-right:4px;"></MudIconButton>
+        <MudTextField @bind-Value="_searchString" @ref="scaninput" Immediate="true" FullWidth=false Placeholder="@Localizer["Scan for inbound task"]" Class="mt-0 mb-3"></MudTextField>
+        <MudIconButton DisableElevation Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Clear" Color="Color.Secondary" OnClick="LoadData" Style="margin-right:4px;"></MudIconButton>
+    </div>
+
+
+</MudPaper>
+*@
+
+<div style="height: calc(100vh - 120px); overflow-y: auto;">
+   
+    <MudPaper Style="border-top: solid 6px #74bdf0">
+        <MudTable Class="mytasks" T="InventoryTaskOperationDTO" Items="_operationListe" Hover="false" Breakpoint="Breakpoint.None"
+                  Filter="new Func<InventoryTaskOperationDTO, bool>(Search)"
+                  Loading="@_global.IsLoading" LoadingProgressColor="Color.Info"
+                  Style="background-color: #e6f1f8;">
+            <HeaderContent>
+
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<InventoryTaskOperationDTO, object>(x => x.LogisticsAreaID)">Zone</MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<InventoryTaskOperationDTO, object>(x => x.Progress)">Progrès</MudTableSortLabel>
+                </MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+
+                <MudTd DataLabel="Zone">@context.LogisticsAreaID</MudTd>
+                <MudTd DataLabel="Avancement">
+                    @if (context.Progress == 100)
+                    {
+                        <MudText Typo="Typo.subtitle1" Color="Color.Dark">
+                            <b> @context.Progress %</b> <br />
+                        </MudText>
+                        <MudProgressLinear Color="Color.Success" Size="Size.Large" Value="@context.Progress" Class="mx-0 my-0">
+                           
+                        </MudProgressLinear>
+                    }
+                    else
+                    { <MudText Typo="Typo.subtitle1" Color="Color.Dark">
+                                <b> @context.Progress %</b> <br />
+                            </MudText>
+                        <MudProgressLinear Color="Color.Warning" Size="Size.Large" Value="@context.Progress" Class="mx-0 my-0">
+                           
+                        </MudProgressLinear>
+                    }
+                   
+                    @*
+                    <MudBadge Content="@context.ItemsNumberValue" Origin="Origin.TopLeft" Color="Color.Primary" Overlap="false" Class="mx-6 my-4">
+                    @Localizer[context.OperationType]
+                    </MudBadge>
+                    *@
+                </MudTd>
+
+                <MudTd Style="Width:26px">
+                    @if (_global.IsMobileView)
+                    {
+                        <MudIconButton Color="Color.Primary" Icon="@Icons.Material.Filled.Edit"
+                                   OnClick="@(() => OpenOperationTask(context))"
+                                   Variant="Variant.Outlined" />
+                    }
+                    
+
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+
+    
+</div>
+@if (_global.IsMobileView)
+{
+    <div style="margin-bottom: 53px"></div>
+    <MudAppBar Bottom="true" Fixed="true" Color="Color.Primary" Elevation="1" Class="mobile-footer-barr">
+        <MudIconButton @ref="returnButton" Icon="@Icons.Material.Filled.KeyboardReturn" Style="background-color: orange; color: white" Edge="Edge.Start"
+                       OnClick="@(BackToParent)"/>
+
+        <MudSpacer />
+        @if (_CanCloseTask)
+        {
+ 
+        <MudIconButton Disabled="!_global.AllowInventoryAddItem" Icon="@Icons.Material.Filled.Lock" Class="" Style="background-color: #000000;color: white" Edge="Edge.Start"
+                       OnClick="FinishAndClose" />
+        <MudSpacer />
+        }
+        
+        @if (_CanResetTask)
+        {
+          
+        <MudIconButton Disabled="!_global.AllowInventoryAddItem" Icon="@Icons.Material.Filled.SettingsBackupRestore" Class="" Style="background-color: #bb1f1f;color: white" Edge="Edge.Start"
+                   OnClick="ResetTask" />
+        <MudSpacer />
+        
+        }
+        else
+        {
+  <MudIconButton Disabled="!_global.AllowInventoryAddItem" Icon="@Icons.Material.Filled.PersonOff" Class="" Style="background-color: #ea5a4f;color: white" Edge="Edge.Start"
+                   OnClick="UnisignTask" />
+        <MudSpacer />
+        }   
+
+      
+
+@if (_global.ShowScanButton)
+{
+
+    <MudIconButton Disabled="_global.IsLoading" Icon="@Icons.Material.Filled.QrCode2" Class="" Style="background-color: #1E88E5; color: white" Edge="Edge.End"
+                   OnClick="ScanBarCode"/>
+}
+
+    </MudAppBar>
+}

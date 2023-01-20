@@ -1,0 +1,181 @@
+﻿@page "/Mobile/Logistics/{ProcessType}"
+@using System.Net.Http.Json
+@using Uni.Scan.Transfer.DataModel.LogisticTask
+@using static MudBlazor.CategoryTypes
+@layout NoAppBarLayout
+
+
+
+<style>
+    tbody tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #fff;
+    }
+
+    .mud-table-cell {
+        font-weight: bold;
+        font-size: small;
+    }
+
+    .mud-table-sort-label {
+        font-weight: bolder;
+        font-size: medium;
+    }
+
+    .mud-badge-unsigned {
+        background-color: #ebcf7c;
+        color: white;
+    }
+</style>
+
+@if (_global.IsMobileView)
+{
+    <MudAppBar Elevation="5" Dense="true" Style="border-top: solid 2px #7398c1;">
+
+
+        <MudText Typo="Typo.h6" Class="ml-2">@Localizer[ProcessType] Liste</MudText>
+
+        <MudSpacer />
+
+
+        <MudIconButton Disabled="_global.IsLoading" Icon="@Icons.Material.Filled.Refresh" Size="Size.Medium" Style="color:#85c3f4;padding: 5px;border: solid" Edge="Edge.Start"
+                   OnClick="Refresh" />
+    </MudAppBar>
+    @*    <div style="margin-top: 50px"></div>*@
+
+    @*    <div style="margin-top: 50px"></div>*@
+}
+
+
+
+
+
+@*
+<MudPaper Elevation="3" Style="margin-bottom:5px;">
+
+
+    <div class="mud-toolbar mud-toolbar-gutters mud-table-toolbar" style="border-left:10px  #d04512">
+        <MudIconButton DisableElevation Variant="Variant.Outlined" Icon="@Icons.Material.Filled.QrCode" Color="Color.Primary" OnClick="OpenScanner" Style="margin-right:4px;"></MudIconButton>
+        <MudTextField @bind-Value="_searchString" @ref="scaninput" Immediate="true" FullWidth=false Placeholder="@Localizer["Scan for inbound task"]" Class="mt-0 mb-3"></MudTextField>
+        <MudIconButton DisableElevation Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Clear" Color="Color.Secondary" OnClick="LoadData" Style="margin-right:4px;"></MudIconButton>
+    </div>
+
+
+</MudPaper>
+*@
+
+<div style="height:calc(100vh - 120px); overflow-y:auto">
+
+
+    <MudTabs Centered="true" @ref="tabs" Rounded="false" Style="font-size: small;" Class="p3" ActivePanelIndexChanged="FocusScanInput">
+        <MudTabPanel Text="Mes tâches">
+            <MudPaper Style="border-top:solid 6px #74bdf0">
+                <MudTable Class="mytasks" T="LogisticTaskDTO2" Items="_mytaskList" Hover="false" Breakpoint="Breakpoint.None"
+                          Filter="new Func<LogisticTaskDTO2, bool>(Search)"
+                          Loading="@_global.IsLoading" LoadingProgressColor="Color.Info"
+                          Style="background-color: #e6f1f8;">
+                    <HeaderContent>
+                        <MudTh>
+                            <MudTableSortLabel SortBy="new Func<LogisticTaskDTO2, object>(x => x.Id)">Id</MudTableSortLabel>
+                        </MudTh>
+                        <MudTh>
+                            <MudTableSortLabel SortBy="new Func<LogisticTaskDTO2, object>(x => x.OperationType)">Type</MudTableSortLabel>
+                        </MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+
+                    <RowTemplate>
+
+                        <MudTd DataLabel="Id">@context.Id</MudTd>
+                        <MudTd DataLabel="type">
+
+
+                            <MudBadge Content="@context.ItemsNumberValue" Origin="Origin.TopLeft" Color="Color.Primary" Overlap="false" Class="mx-6 my-4">
+                                @Localizer[context.OperationType]
+                            </MudBadge>
+
+                        </MudTd>
+
+                        <MudTd>
+                            @if (_global.IsMobileView)
+                            {
+                                <MudIconButton Color="Color.Primary" Icon="@Icons.Material.Filled.Edit"
+                                           OnClick="@(() => OpenTask(context))"
+                                           Variant="Variant.Outlined" />
+                            }
+
+
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudTabPanel>
+
+        <MudTabPanel Text="Tâches Libres">
+            <MudPaper Style="border-top:solid 6px #ebcf7c">
+                <MudTable Class="unassignedtas" Items="_unassignedtaskList" Hover="false"
+                          Breakpoint="Breakpoint.None"
+                          Filter="new Func<LogisticTaskDTO2, bool>(Search)"
+                          Loading="@_global.IsLoading" LoadingProgressColor="Color.Info"
+                          Style="background-color: #fff7dc;">
+                    <HeaderContent>
+
+                        <MudTh>
+                            <MudTableSortLabel SortBy="new Func<LogisticTaskDTO2, object>(x => x.Id)">Id</MudTableSortLabel>
+                        </MudTh>
+                        <MudTh>
+                            <MudTableSortLabel SortBy="new Func<LogisticTaskDTO2, object>(x => x.OperationType)">Type</MudTableSortLabel>
+                        </MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+
+                    <RowTemplate>
+
+                        <MudTd DataLabel="Id">@context.Id</MudTd>
+                        <MudTd DataLabel="type">
+                            <MudBadge Content="@context.ItemsNumberValue" Origin="Origin.TopLeft" BadgeClass="mud-badge-unsigned" Overlap="false" Class="mx-6 my-4">
+                                @Localizer[context.OperationType]
+                            </MudBadge>
+
+                        </MudTd>
+
+                        <MudTd>
+
+                            <MudIconButton Disabled="_global.IsLoading" Color="Color.Primary" Icon="@Icons.Material.Filled.GroupAdd"
+                                           OnClick="(() => TakeTaskAsync(context))" />
+
+
+                        </MudTd>
+
+
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudTabPanel>
+
+    </MudTabs>
+
+
+</div>
+@if (_global.IsMobileView)
+{
+    <div style="margin-bottom: 53px"></div>
+    <MudAppBar Bottom="true" Fixed="true" Color="Color.Primary" Elevation="1" Class="mobile-footer-barr">
+        <MudIconButton @ref="returnButton" Icon="@Icons.Material.Filled.KeyboardReturn" Style="background-color: orange;color: white" Edge="Edge.Start"
+                   OnClick="@(BackToParent)" />
+
+        <MudSpacer />
+
+        <MudTextField @bind-Value="_searchString" @ref="scaninput" Immediate="true" Clearable="true" FullWidth="true" Placeholder="@Localizer["Search"]"
+                  AdornmentIcon="@Icons.Material.Filled.FilterAlt" Adornment="Adornment.Start" Class="invisible mx-6 mb-5"></MudTextField>
+        @if (_global.ShowScanButton)
+        {
+            <MudIconButton Disabled="_global.IsLoading" Icon="@Icons.Material.Filled.QrCode2" Class="" Style="background-color: #1E88E5; color: white" Edge="Edge.Start"
+                   OnClick="ScanBarCode" />
+
+        }
+    </MudAppBar>
+}

@@ -1,0 +1,131 @@
+﻿@page "/LogisticArea"
+@using System.Net.Http.Json
+@using Uni.Scan.Client.Infrastructure.ApiClients
+@using Uni.Scan.Transfer.DataModel
+@inject HttpClient httpClient
+@inject ISnackbar Snackbar
+
+
+<style>
+    tbody tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #fff;
+    }
+
+    .mud-table-cell {
+        font-weight: bold;
+        font-size: small;
+    }
+
+    .mud-table-sort-label {
+        font-weight: bolder;
+        font-size: medium;
+    }
+
+    .mud-radio-group {
+        padding-bottom: 8px;
+    }
+</style>
+
+
+<style>
+
+    tbody tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #fff;
+    }
+
+    .mud-table-cell {
+        font-weight: bold;
+        font-size: small;
+    }
+
+    .mud-table-sort-label {
+        font-weight: bolder;
+        font-size: medium;
+    }
+
+    .mud-badge-unsigned {
+        background-color: #ebcf7c;
+        color: white;
+    }
+
+
+    
+    th.mud-table-cell {
+        background: #e3edf9 !important;
+        color: black !important;
+        padding: 12px 12px !important;
+        border-bottom: #549df2 solid;
+      
+    }
+
+     
+
+    .mud-table-container {
+        border: solid 1px #c6dbc9;
+    }
+</style>
+
+<MudPaper Elevation="4" Class="mb-2 mx-1">
+    <MudToolBar Style="border-left: #549df2 solid 3px;border-right: #549df2 solid 3px">
+        <MudTextField @bind-Value="searchString" Immediate="true" FullWidth=false Placeholder="@Localizer["Recherche"]" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
+
+        <MudSpacer />
+
+        <MudButton DisableElevation Variant="Variant.Filled" OnClick="GetAreas" StartIcon="@Icons.Material.Filled.Refresh" IconColor="Color.Surface" Color="Color.Secondary">@Localizer["Rafraîchir"]</MudButton>
+
+    </MudToolBar>
+</MudPaper>
+
+
+<MudTable Items="@Elements" Dense="@dense" Hover="@hover" Loading="@_global.IsLoading" 
+          LoadingProgressColor="Color.Info" Breakpoint="Breakpoint.None" 
+          Filter="new Func<LogisticAreaDTO,bool>(Search)"
+          Class="mx-1"
+                  SortLabel="Sort By" Style="background-color: #e6f1f8;">
+
+            <HeaderContent>
+                
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticAreaDTO, object>(x=>x.LogisticAreaID)">@Localizer["Zone"]</MudTableSortLabel></MudTh>
+                    <MudTh Style="text-align:center; font-weight: bolder; font-size: medium;">@Localizer["Location"]</MudTh>
+                    <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticAreaDTO, object>(x=>x.TypeCodeText)">@Localizer["Type"]</MudTableSortLabel></MudTh>
+
+                    <MudTh></MudTh>
+               
+
+
+            </HeaderContent>
+
+            <RowTemplate>
+               
+                    <MudTd Style="text-align:center" DataLabel="LogisticAreaID"><MudHighlighter Text="@context.LogisticAreaID" HighlightedText="@searchString" /></MudTd>
+                    <MudTd Style="text-align:center" DataLabel="Location">@context.SiteID / @context.InventoryManagedLocationID</MudTd>
+                    <MudTd Style="text-align:center" DataLabel="TypeCodeText">@context.TypeCodeText</MudTd>
+                    <MudTd Style="text-align:right">
+                        @if (_canPrintLogisticArea)
+                        {
+                            <MudButtonGroup Color="Color.Transparent" Variant="Variant.Text">
+                               
+                                <MudTooltip Text="Imprimer">
+                                    <MudIconButton Icon="@Icons.Filled.Print" OnClick="@(() => PrintAreaLabel(@context.LogisticAreaID))" />
+                                </MudTooltip>
+                            </MudButtonGroup>
+                        }
+                    </MudTd>
+             
+            </RowTemplate>
+
+            <PagerContent>
+                <TablePager />
+            </PagerContent>
+
+        </MudTable>
+
+

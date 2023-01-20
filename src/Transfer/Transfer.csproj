@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>Uni.Scan.Transfer</RootNamespace>
+    <AssemblyName>Uni.Scan.Transfer</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Requests\Inetgration\**" />
+    <EmbeddedResource Remove="Requests\Inetgration\**" />
+    <None Remove="Requests\Inetgration\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="10.3.6" />
+    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="6.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Command\" />
+    <Folder Include="DataModel\Label\" />
+    <Folder Include="Features\" />
+    <Folder Include="Resources\Features\" />
+    <Folder Include="Resources\Validators\Features\" />
+    <Folder Include="Validators\Features\" />
+  </ItemGroup>
+
+</Project>

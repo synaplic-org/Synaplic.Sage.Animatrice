@@ -1,0 +1,85 @@
+﻿@using Uni.Scan.Transfer.DataModel;
+
+<EditForm Model="@identifiedStockID" OnValidSubmit="SaveAsync">
+    <FluentValidationValidator @ref="_fluentValidationValidator" />
+    <MudDialog>
+
+        <TitleContent>
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.Add" Class="mr-3 mb-n1" />
+                        @Localizer["Créer"]
+                    </MudText>
+        </TitleContent>
+
+        <DialogContent>
+                <MudGrid>
+                    <MudItem xs="12" >
+                        <MudTextField Variant="Variant.Outlined" For="@(() => identifiedStockID.IdentifiedStockID)" @bind-Value="identifiedStockID.IdentifiedStockID" Label="@Localizer["Lot"]" />
+                    </MudItem>
+                    <MudItem xs="12" >
+                    <MudDatePicker PickerVariant="PickerVariant.Dialog" IconSize="Size.Small" For="@(() => identifiedStockID.ProductionDateTime)" @bind-Value="identifiedStockID.ProductionDateTime" Label="@Localizer["Date de production"]" />
+                    </MudItem>
+                    <MudItem xs="12" >
+                    <MudDatePicker PickerVariant="PickerVariant.Dialog" IconSize="Size.Small" For="@(() => identifiedStockID.ExpirationDateTime)" @bind-Value="@identifiedStockID.ExpirationDateTime" Label="@Localizer["Date d'expiration"]" />
+                    </MudItem>
+                </MudGrid>
+        </DialogContent>
+
+        <DialogActions>
+                <MudButton DisableElevation Style="width:100%" Variant="Variant.Filled" OnClick="Cancel">@Localizer["Annuler"]</MudButton>
+                <MudButton DisableElevation Style="width:100%" Variant="Variant.Filled" ButtonType="ButtonType.Submit" Disabled="@(!Validated)" Color="Color.Success">@Localizer["Enregistrer"]</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [Inject] private IIdentifiedStockClient _Client { get; set; }
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; }
+    [Parameter] public IdentifiedStockDTO identifiedStockID { get; set; } = new();
+    private List<IdentifiedStockDTO> _identifiedStockID { get; set; } = new();
+
+    private FluentValidationValidator _fluentValidationValidator;
+    private bool Validated => _fluentValidationValidator.Validate(options => { options.IncludeAllRuleSets(); });
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+
+    }
+
+    public void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private async Task SaveAsync()
+    {
+        var response = await _Client.CreateIdentifiedStockAsync(identifiedStockID);
+        //if (response.Succeeded)
+        //{
+        //    if (identifiedStockID.ID.Equals(0))
+        //    {
+        //        _snackBar.Add("Lot Enregistré", Severity.Success);
+        //    }
+        //    else
+        //    {
+        //        _snackBar.Add("Lot mis à jour", Severity.Info);
+        //    }
+
+        //    MudDialog.Close();
+        //}
+        //else
+        //{
+        //    foreach (var message in response.Messages)
+        //    {
+        //        _snackBar.Add(message, Severity.Error);
+        //    }
+        //}
+
+    }
+
+    private async Task LoadDataAsync()
+    {
+        await Task.CompletedTask;
+    }
+}

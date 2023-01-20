@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <title> Réinitialisation du mot de passe </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <style>
+
+        @("@")media screen {
+            @("@")font-face {
+                font-family: 'Montserrat';
+                font-style: normal;
+                font-weight: 400;
+                src: local('Lato Regular'), local('Lato-Regular'), url(https://fonts.gstatic.com/s/lato/v11/qIIYRU-oROkIk8vfvxw6QvesZW2xOQ-xsNqO47m55DA.woff) format('woff');
+            }
+
+            @("@")font-face {
+                font-family: 'Montserrat';
+                font-style: normal;
+                font-weight: 700;
+                src: local('Lato Bold'), local('Lato-Bold'), url(https://fonts.gstatic.com/s/lato/v11/qdgUG4U09HnJwhYI-uK18wLUuEpTyoUstqEm5AMlJo4.woff) format('woff');
+            }
+
+            @("@")font-face {
+                font-family: 'Montserrat';
+                font-style: italic;
+                font-weight: 400;
+                src: local('Lato Italic'), local('Lato-Italic'), url(https://fonts.gstatic.com/s/lato/v11/RYyZNoeFgb0l7W3Vu1aSWOvvDin1pK8aKteLpeZ5c0A.woff) format('woff');
+            }
+
+            @("@")font-face {
+                font-family: 'Montserrat';
+                font-style: italic;
+                font-weight: 700;
+                src: local('Lato Bold Italic'), local('Lato-BoldItalic'), url(https://fonts.gstatic.com/s/lato/v11/HkF_qI1x_noxlxhrhMQYELO3LdcAZYWl9Si6vvxL-qU.woff) format('woff');
+            }
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            cursor: pointer;
+            text-align: center;
+            outline: none;
+            background-color: #4c7faf;
+            border: none;
+            border-radius: 15px;
+        }
+
+        .social-menu ul {
+            top: 50%;
+            left: 50%;
+            padding-left: 200px;
+            display: flex;
+        }
+
+            .social-menu ul li {
+                list-style: none;
+                margin: 0 10px;
+            }
+
+                .social-menu ul li .fa {
+                    font-size: 25px;
+                    line-height: 50px;
+                    transition: .5s;
+                }
+
+                .social-menu ul li a {
+                    color: white;
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                }
+
+        table, td, div, h1, p {
+            font-family: Arial, sans-serif;
+        }
+        <meta name='viewport' content='width=device-width, initial-scale=1.0' >
+    </style>
+</head>
+<body style="margin:0;padding:0;">
+    <table role="presentation" style="width:100%;border-collapse:collapse;border:0;border-spacing:0;background:#ffffff;">
+
+        <tr>
+            <td bgcolor="#354A5F" align="center" style="padding: 0px 10px 0px 10px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
+                    <tr>
+                        <td bgcolor="#ffffff" align="center" valign="top"
+                            style="padding: 40px 20px 20px 20px; border-radius: 4px 4px 0px 0px; color: #111111; font-family: Arial,sans-serif; font-size: 40px; font-weight: 300; line-height: 48px;">
+                            <h1 style="font-size: 48px;  font-weight: 400; margin: 2px;">Réinitialisation du mot de passe </h1> <img class="logo" src="" width="125" height="120"
+                                                                                                                                    style="display: block; border: 0px;" />
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td align="center" style="padding:0;">
+                <table role="presentation" style="width:602px;border-collapse:collapse;border:1px solid #cccccc;border-spacing:0;text-align:left;">
+
+                    <tr>
+                        <td >
+                            <table role="presentation" style="width:100%;border-collapse:collapse;border:0;border-spacing:0;">
+                                <tr>
+                                    <td style="padding: 0px 30px 30px 30px; border-radius: 4px 4px 4px 4px; color: #666666; font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">
+                                        <p style=" color: #666666; font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">Bonjour  <a class="userName"></a>.</p>
+                                        <p style=" color: #666666; font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">Le mot de passe du compte <a href="http:://localhost:5001/">UNISCAN</a> lié à cette adresse e-mail a été réinitialisé.</p>
+                                        <p style=" color: #666666; font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">Appuyez simplement sur le bouton ci-dessous pour entrer un nouveau mot de passe.</p>
+                                        <a class="passwordResetURL" style="border-radius: 50px; justify-content: center; align-items: center; text-transform: uppercase; font-size: 14px; padding: 10px 24px; display: inline-block; background: #20e277; color: #000; text-decoration: none;" href="">Réinitialiser maintenant</a>
+                                    </td>
+                                </tr>
+
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+
+                                <tr>
+                                    <td bgcolor="#ffffff" align="left"
+                                        style="padding: 0px 30px 30px 30px; color: #666666;  font-size: 18px; font-weight: 400; line-height: 25px;">
+                                        <p style="margin: 0;">Si cela ne fonctionne pas, copiez et collez le lien suivant dans votre navigateur :</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td bgcolor="#ffffff" align="left"
+                                        style="padding: 0px 30px 30px 30px; color: #666666; font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;overflow-wrap: anywhere;">
+                                        <p style="margin: 0;">
+                                            <a class="passwordResetShowURL" style="color: #000; font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: small;"> </a>
+                                        </p>
+
+                                    </td>
+
+                                </tr>
+                  
+
+
+
+
+                    <tr>
+                        <td bgcolor="#ffffff" align="left"
+                            style="padding: 0px 30px 40px 30px; border-radius: 0px 0px 4px 4px; color: #666666; font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">
+                            <p style="margin: 0;">Cheers,<br>UNISCAN Support Team</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+       
+            <tr>
+                <td bgcolor="#354A5F" align="center">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
+                        <tr>
+                            <td bgcolor="#354A5F" align="center"
+                                style="padding: 30px 30px 30px 30px; border-radius: 4px 4px 4px 4px; color: #666666; font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">
+                                <h2 style="font-size: 20px; font-weight: 400; color: #111111; margin: 0;">
+                                    Vous voulez en savoir plus sur
+                                    UNISCAN?
+                                </h2>
+                                <p style="margin: 0;">
+                                    <a href="https://www.google.com" target="_blank" style="color: #FFF;">
+                                        En savoir plus ici
+                                    </a>
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+</body>
+</html>

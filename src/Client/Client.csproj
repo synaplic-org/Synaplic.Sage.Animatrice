@@ -1,0 +1,76 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+		<RootNamespace>Uni.Scan.Client</RootNamespace>
+		<AssemblyName>Uni.Scan.Client</AssemblyName>
+		<ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
+		<EmccTotalMemory>16777216</EmccTotalMemory>
+		<LangVersion>latest</LangVersion>
+		<DebugType>portable</DebugType>
+		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DefineConstants>$(DefineConstants)TRACE;$(DefineConstants)DEBUG</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DefineConstants>$(DefineConstants)TRACE;$(DefineConstants)DEBUG</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Remove="Pages\Logistics\LogosticTaskLabelPage.razor" />
+		<Content Remove="Shared\Components\UniLogoUni.razor" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Blazored.FluentValidation" Version="2.0.3" />
+		<PackageReference Include="BlazorIndexedDB" Version="0.3.1" />
+		<PackageReference Include="Mapster" Version="7.3.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.12" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.12" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Localization" Version="6.0.1" />
+		<PackageReference Include="MudBlazor" Version="6.1.4" />
+		<PackageReference Include="Blazored.LocalStorage" Version="4.1.5" />
+		<PackageReference Include="Toolbelt.Blazor.PWA.Updater" Version="2.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Client.Infrastructure\Client.Infrastructure.csproj" />
+		<ProjectReference Include="..\Shared\Shared.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="Pages\Labels\LogisticLabelPage.razor" />
+		<None Include="Pages\Logistics\LogisticTaskPageMobile.razor" />
+		<None Include="Pages\Printing\AddEditLabelTemplate.razor" />
+		<None Include="Pages\Printing\LogisticsTaskLabels.razor" />
+		<None Include="Pages\Logistics\LogisticTaskDetailMobile.razor" />
+		<None Include="Pages\Logistics\LogisticTaskPage.razor" />
+		<None Include="Pages\Printing\PrintModal.razor" />
+		<None Include="Pages\Stock\StockOverview.razor" />
+		<None Include="Pages\Settings\TaskParametres.razor" />
+		<None Include="wwwroot\fonts\SAP-icons.woff2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Update="Pages\Settings\TaskParametres.razor">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</Content>
+		<Content Update="wwwroot\service-worker.published.js">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+</Project>

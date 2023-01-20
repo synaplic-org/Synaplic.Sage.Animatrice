@@ -1,0 +1,33 @@
+﻿@page "/account"
+
+<MudTabs Elevation="25" Color="Color.Transparent" Rounded="true" PanelClass="mt-6">
+    <MudTabPanel Text="@Localizer["Identité"]">
+        <Profile />
+    </MudTabPanel>
+    <MudTabPanel Text="@Localizer["Mot de passe"]">
+        <Security />
+    </MudTabPanel>
+</MudTabs>
+
+@if (_global.IsMobileView)
+{
+    <div style="margin-bottom: 55px"></div>
+    <MudAppBar Bottom="true" Fixed="true" Color="Color.Primary"  Elevation="1"  Class="mobile-footer-barr" >
+        <MudIconButton Icon="@Icons.Material.Filled.KeyboardReturn" Style="background-color: orange;color: white" Edge="Edge.Start"
+                       OnClick="@(()=>_navigationManager.NavigateTo("/"))"/>
+    
+   
+
+    
+    </MudAppBar>
+}
+
+@code
+{
+
+    protected override async Task OnInitializedAsync()
+    {
+        _global.CurrentTitle = Localizer["MON COMPTE"];
+        await Task.Delay(1);
+    }
+}

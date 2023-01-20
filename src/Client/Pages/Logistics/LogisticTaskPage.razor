@@ -1,0 +1,122 @@
+﻿@page "/Logistics/{ProcessType}"
+@using System.Net.Http.Json
+@using Uni.Scan.Transfer.DataModel.LogisticTask
+@using static MudBlazor.CategoryTypes
+
+ 
+
+
+<style>
+
+    tbody tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #fff;
+    }
+
+    .mud-table-cell {
+        font-weight: bold;
+        font-size: small;
+    }
+
+    .mud-table-sort-label {
+        font-weight: bolder;
+        font-size: medium;
+    }
+
+    .mud-badge-unsigned {
+        background-color: #ebcf7c;
+        color: white;
+    }
+
+
+    
+    th.mud-table-cell {
+        background: #e3edf9 !important;
+        color: black !important;
+        padding: 12px 12px !important;
+        border-bottom: #549df2 solid;
+      
+    }
+
+     
+
+    .mud-table-container {
+        border: solid 1px #c6dbc9;
+    }
+</style>
+
+<MudPaper Elevation="4" Class="mb-2 mx-1">
+    <MudToolBar Class="uni-search-bar">
+    <MudTextField @bind-Value="_searchString" Immediate="true" FullWidth=false Placeholder="@Localizer["Recherche"]" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
+
+    <MudSpacer />
+
+    <MudButton DisableElevation Variant="Variant.Filled" OnClick="LoadData" StartIcon="@Icons.Material.Filled.Refresh" IconColor="Color.Surface" Color="Color.Secondary">@Localizer["Rafraîchir"]</MudButton>
+
+</MudToolBar>
+</MudPaper>
+ 
+@*<HeroTitle Title="@Localizer[ProcessType]" />
+*@
+<MudTable Hover="true" Elevation="3" Class="mx-1" Items="_taskList" Dense="true" Striped="true"
+          FixedHeader="true"
+          FixedFooter="true" 
+          Height="calc(100vh - 185px)" 
+          Style="  overflow-y:auto"
+          Loading="@_global.IsLoading" 
+          LoadingProgressColor="Color.Info" 
+          Filter="new Func<LogisticTaskDTO2, bool>(Search)">
+@*    <ToolBarContent>
+      
+    </ToolBarContent>*@
+    <HeaderContent>
+        <MudTh><MudTableSortLabel SortBy="new Func<LogisticTaskDTO2, object>(x => x.Id)">@Localizer["ID"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<LogisticTaskDTO2, object>(x => x.ItemsNumberValue)">@Localizer["Type"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<LogisticTaskDTO2, object>(x => x.SiteId)">@Localizer["ID Site"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<LogisticTaskDTO2, object>(x => x.ResponsibleName)">@Localizer["Responsable"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<LogisticTaskDTO2, object>(x => x.ThirdpartyName)">@Localizer["ID demande"]</MudTableSortLabel></MudTh>
+        <MudTh Style="text-align:center">@Localizer["Actions"]</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>
+            <MudHighlighter Text="@context.Id" HighlightedText="@_searchString" />
+        </MudTd>
+        <MudTd>
+            <MudBadge Content="@context.ItemsNumberValue" Origin="Origin.TopRight" Color="Color.Primary" Overlap="false" Class="mx-6 my-4">
+                @Localizer[context.OperationType]
+            </MudBadge>
+        </MudTd>
+        <MudTd>
+            <MudHighlighter Text="@context.SiteId" HighlightedText="@_searchString" />
+        </MudTd>
+        <MudTd>
+            <MudHighlighter Text="@context.ResponsibleName" HighlightedText="@_searchString" />
+        </MudTd>
+     
+       
+        <MudTd>
+            <MudHighlighter Text="@context.RequestId" HighlightedText="@_searchString" />
+        </MudTd>
+
+        <MudTd DataLabel="Actions" Style="text-align:center">
+            <MudIconButton Color="Color.Primary" Icon="@Icons.Material.Filled.LocalPrintshop" 
+                           OnClick="@(() => PrinLabels2(context))"
+                           Variant="Variant.Outlined" />
+       @*     <MudIconButton Color="Color.Primary" Icon="@Icons.Material.Filled.QrCode2"
+                           OnClick="@(() => PrinLabels(context))"
+                           Variant="Variant.Outlined" />*@
+        </MudTd>
+    </RowTemplate>
+
+    <PagerContent>
+        <TablePager />
+    </PagerContent>
+</MudTable>
+
+
+<MudScrollToTop>
+    <MudFab Color="Color.Primary" Icon="@Icons.Filled.KeyboardArrowUp" />
+</MudScrollToTop>

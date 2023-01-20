@@ -1,0 +1,20 @@
+﻿@namespace Uni.Scan.Client.Shared.Components
+
+<MudCard Elevation="0" Square="true" Class="@Class">
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            @if (string.IsNullOrEmpty(ImageDataUrl))
+            {
+                <MudAvatar Color="Color.Primary">@FirstLetterOfName</MudAvatar>
+            }
+            else
+            {
+                <MudAvatar Image="@ImageDataUrl" Style="height:50px; width:50px;"> </MudAvatar>
+            }
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.body2">@FirstName @SecondName</MudText>
+            <MudText Typo="Typo.caption" Style="font-size: xx-small;">@Email</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+</MudCard>

@@ -1,0 +1,68 @@
+﻿@page "/login"
+@layout MainLayout
+@attribute [AllowAnonymous]
+@using Uni.Scan.Shared.Constants.Localization
+<MudAppBar Elevation="5" Dense="true" Style="border-top: solid 2px #7398c1;">
+    
+    <MudIcon Icon="@Icons.Material.Filled.QrCode2"></MudIcon>
+    <MudText Typo="Typo.h6"  Class="ml-2">UNI=SCAN  </MudText>
+    <MudText Typo="Typo.caption"  Class="ml-2">@_global.CurrentVersion</MudText>
+        
+    
+    <MudSpacer/>
+    
+    
+    @*<MudIconButton   Icon="@Icons.Material.Filled.Settings" Size="Size.Medium" Style="color:#85c3f4;padding: 5px;border: solid" Edge="Edge.Start" />*@
+</MudAppBar>
+
+
+<div style=" background-image: url(images/mar-pattern.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: right bottom;background-color:#eef3f6f2;padding-top: 50px	">
+    
+  
+    
+    <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center" Style="height: calc(100vh - 50px);">
+        <MudPaper Elevation="9" Class="pa-8 rounded-xl">
+            <EditForm Model="@_tokenModel" OnValidSubmit="SubmitAsync">
+                <FluentValidationValidator @ref="_fluentValidationValidator"/>
+                <MudGrid>
+                    <DataAnnotationsValidator/>
+                    <MudItem xs="12">
+                        <div class="d-flex justify-center">
+                            <MudText Typo="Typo.h4">@Localizer["Connexion"]</MudText>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField T="string" Label="@Localizer["E-mail"]" Variant="Variant.Outlined" Clearable="true"
+                                      @bind-Value="_tokenModel.Email" For="@(() => _tokenModel.Email)"/>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField Label="@Localizer["Mot de passe"]" Variant="Variant.Outlined"
+                                      @bind-Value="_tokenModel.Password" For="@(() => _tokenModel.Password)"
+                                      InputType="@_passwordInput"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@_passwordInputIcon"
+                                      OnAdornmentClick="TogglePasswordVisibility"/>
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudLink Href="/account/forgot-password">@Localizer["Mot de passe oublié ?"]</MudLink>
+                    </MudItem>
+                    <MudItem xs="12" Class="d-flex justify-center">
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Disabled="@(!Validated)" Color="Color.Primary" Size="Size.Large" Style="width: 100%;">@Localizer["Se Connecter"]</MudButton>
+                    </MudItem>
+
+                    @* <MudItem xs="12">
+                        <MudButton OnClick="FillAdministratorCredentials">@Localizer["Fill Admin User Credentials"]</MudButton>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudButton OnClick="FillBasicUserCredentials">@Localizer["Fill Basic User Credentials"]</MudButton>
+                    </MudItem>*@
+                </MudGrid>
+            </EditForm>
+        </MudPaper>
+    </MudContainer>
+
+</div>

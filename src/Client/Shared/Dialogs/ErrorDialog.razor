@@ -1,0 +1,26 @@
+﻿
+<MudDialog>
+    <DialogContent>
+        <div style="max-height: calc(100vh - 130px); max-width:calc(100vw - 30px); overflow: auto">
+        @foreach (var s in Errors)
+        {
+                <MudAlert Severity="Severity.Error" Style="">@s</MudAlert>
+        }
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Dark" Variant="Variant.Filled" OnClick="Submit">Fermer</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public List<string> Errors { get; set; }
+    
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    
+
+     
+}

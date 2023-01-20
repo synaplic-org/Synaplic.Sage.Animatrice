@@ -1,0 +1,235 @@
+﻿@page "/Logistics/Labels/{ProcessType}/{TaskId}"
+@inject Microsoft.Extensions.Localization.IStringLocalizer<LogisticsTaskLabels> Localizer
+
+@using System.ComponentModel.Design
+@using Microsoft.AspNetCore.Components
+@using Uni.Scan.Transfer.Responses.Identity
+@using Uni.Scan.Client.Infrastructure.ApiClients
+@using Uni.Scan.Transfer.DataModel
+
+
+<style>
+    .mud-table-container {
+        overflow: auto;
+    }
+
+
+    tbody tr:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #fff;
+    }
+
+    .mud-table-cell {
+        font-weight: bold;
+        font-size: small;
+    }
+
+    .mud-table-sort-label {
+        font-weight: bolder;
+        font-size: medium;
+    }
+
+    .mud-table-row {
+        background-color: #e6f1f8;
+    }
+
+</style>
+<MudStack Row="true">
+    <HeroTitle Title="@Localizer["Gérer Étiquettes pour"]" />
+    <MudText Typo="Typo.h5" Class="ml-2">  @ProcessType , @TaskId </MudText>
+</MudStack>
+
+
+
+<div style="height:calc(100vh - 120px); overflow-y:scroll">
+
+    <MudTable Hover="true" Elevation="25" Items="_taskDetails" Loading="@_global.IsLoading" LoadingProgressColor="Color.Info" Dense="false" Bordered="false" Striped="true" Filter="new Func<LogisticTaskDetailDTO, bool>(Search)">
+        <ToolBarContent>
+            <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="@Localizer["Rechercher"]"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Filled.FilterAlt" IconSize="Size.Medium" Class="mx-1"></MudTextField>
+
+
+            <MudTooltip Text="Rafraîchir">
+                <MudButton DisableElevation Variant="Variant.Filled"
+                           Disabled="@_processing" OnClick="ProcessSomething" StartIcon="@Icons.Material.Filled.Refresh"
+                           IconColor="Color.Surface" Class="mx-1" Color="Color.Success">
+
+
+
+                    @if (_processing)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Color="Color.Default" Indeterminate="true" />
+                        <MudText Color="Color.Surface" Class="ms-2">@Localizer["chargement.."]</MudText>
+                    }
+                    else
+                    {
+                        <MudText>@Localizer["Rafraîchir"]</MudText>
+                    }
+
+
+
+
+                </MudButton>
+            </MudTooltip>
+
+
+            <MudTooltip Text="Imprimer">
+                <MudButton DisableElevation Variant="Variant.Filled" OnClick="(() => InvokeTaskModal())"
+                           StartIcon="@Icons.Material.Filled.Print" IconColor="Color.Surface" Class="mx-1" Color="Color.Tertiary">@Localizer["TÂCHE"]</MudButton>
+            </MudTooltip>
+            @if (_canPrintLabels)
+            {
+                <MudTooltip Text="Imprimer">
+
+                    <MudButton DisableElevation Variant="Variant.Filled" OnClick="(() => InvokeModal())" Class="mx-1"
+                           StartIcon="@Icons.Material.Filled.Print" IconColor="Color.Surface" Color="Color.Primary">@Localizer["Étiquettes"]</MudButton>
+                </MudTooltip>
+            }
+
+
+
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<LogisticTaskDetailDTO, object>(x => x.LineItemID)">@Localizer["Item"]</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LogisticTaskDetailDTO, object>(x => x.ProductID)">@Localizer["ID produit"]</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LogisticTaskDetailDTO, object>(x => x.ProductDescription)">@Localizer["Désignation"]</MudTableSortLabel></MudTh>
+@*            <MudTh><MudTableSortLabel SortBy="new Func<LogisticTaskDetailDTO, object>(x => x.IdentifiedStockID)">@Localizer["Lot"]</MudTableSortLabel></MudTh>
+*@            <MudTh><MudTableSortLabel SortBy="new Func<LogisticTaskDetailDTO, object>(x => x.PlanQuantity)">@Localizer["Quantité"]</MudTableSortLabel> </MudTh>
+            <MudTh></MudTh>
+
+        </HeaderContent>
+
+        <RowTemplate>
+
+
+            <MudTd DataLabel="@Localizer["Item"]">
+                <MudHighlighter Text="@context.LineItemID.ToString()" HighlightedText="@_searchString" />
+            </MudTd>
+            <MudTd DataLabel="@Localizer["ID produit"]">
+                <MudHighlighter Text="@context.ProductID" HighlightedText="@_searchString" />
+            </MudTd>
+            <MudTd DataLabel="@Localizer["Description"]">
+                <MudHighlighter Text="@context.ProductDescription" HighlightedText="@_searchString" />
+            </MudTd>
+@*            <MudTd DataLabel="@Localizer["Lot"]">@context.IdentifiedStockID</MudTd>
+*@            <MudTd DataLabel="@Localizer["Quantité"]">@context.PlanQuantity.ToString("N2")  @context.PlanQuantityUnitCode</MudTd>
+
+            <MudTd DataLabel="@Localizer["Actions"]" Style="text-align: right">
+                <MudButtonGroup Color="Color.Transparent" Variant="Variant.Outlined">
+                    @if (_canCreateLabels)
+                    {
+                        <MudTooltip Text="Nouveau">
+                            <MudIconButton Icon="@Icons.Material.Filled.Add" Color="@Color.Secondary" @onclick="@(() => AddLabel(context))" />
+
+                        </MudTooltip>
+                    }
+
+                    @if (_canPrintLabels)
+                    {
+                        <MudTooltip Text="Imprimer">
+                            <MudIconButton Icon="@Icons.Filled.Print" OnClick="@(() => InvokeSectionLabelsModal(context.ProductID))" />
+
+                        </MudTooltip>
+                    }
+
+                    <MudTooltip Text="Voir">
+                        <MudIconButton Icon="@Icons.Filled.KeyboardDoubleArrowDown" OnClick="@(() => ShowBtnPress(context.ProductID))" />
+
+                    </MudTooltip>
+
+                </MudButtonGroup>
+            </MudTd>
+
+        </RowTemplate>
+
+        <ChildRowContent>
+
+
+            @if (context.ShowDetails)
+            {
+                <MudTr>
+                    <td colspan="6">
+                        <MudCard Elevation="25" Style="padding-bottom: 8px">
+                            <MudPaper Style="@PaperStyle(context)" Class="ml-16">
+                                <MudCardHeader>
+                                    <CardHeaderContent>
+                                        <div class="d-flex justify-space-between flex-grow-1 gap-4">
+                                            <MudText Typo="Typo.body1"> Étiquettes &nbsp:&nbsp <strong>@context.ProductID</strong></MudText>
+                                            <MudText Typo="Typo.body1"> <strong>@context.Lables.Sum(o=> o.NbrEtiquettes * o.QuatityOnLabel).ToString("N2")</strong> &nbsp; @context.PlanQuantityUnitCode </MudText>
+                                        </div>
+
+                                    </CardHeaderContent>
+                                </MudCardHeader>
+                                <MudCardContent Class="pa-0">
+
+                                    <MudTable Items="@context.Lables" Dense="true" Context="CustomContext" CommitEditTooltip="Enregistrer"
+                                          LoadingProgressColor="Color.Info" Loading="@_loaded" Style="background-color: #e6f1f8;"
+                                          Elevation="25" OnCommitEditClick="ItemHasBeenCommitted">
+                                        <ColGroup>
+                                            <col />
+                                            <col />
+                                            <col />
+                                            <col />
+                                            <col style="width:0px;" />
+                                        </ColGroup>
+
+                                        <HeaderContent>
+                                            <MudTh Style="text-align:center"> <MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x => x.QuatityOnLabel)">@Localizer["Colisage"]</MudTableSortLabel></MudTh>
+                                            <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x => x.NbrEtiquettes)"> @Localizer["Nombre D'Étiquettes"]</MudTableSortLabel></MudTh>
+                                            <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x => x.IdentifiedStock)"> @Localizer["Lot"]</MudTableSortLabel></MudTh>
+                                            <MudTh Style="text-align:center"><MudTableSortLabel SortBy="new Func<LogisticTaskLabelDTO, object>(x => x.Duplicata)">@Localizer["Duplicata"]</MudTableSortLabel></MudTh>
+                                            <MudTh></MudTh>
+                                        </HeaderContent>
+
+                                        <RowTemplate>
+                                            <MudTd DataLabel="@Localizer["Colisage"]" Style="text-align:center">@CustomContext.QuatityOnLabel.ToString("N2")</MudTd>
+                                            <MudTd DataLabel="@Localizer["Nombre D'Étiquettes"]" Style="text-align:center">@CustomContext.NbrEtiquettes</MudTd>
+                                            <MudTd DataLabel="@Localizer["Lot"]" Style="text-align:center">@CustomContext.IdentifiedStock</MudTd>
+
+                                            <MudTd DataLabel="@Localizer["Duplicata"]" Style="text-align:center">@CustomContext.Duplicata</MudTd>
+                                            <MudTd Style="text-align:center">
+                                                <MudIconButton Icon="@Icons.Filled.DeleteOutline" @onclick="@(() => Delete(@CustomContext.Id))" />
+                                            </MudTd>
+                                        </RowTemplate>
+
+                                        <RowEditingTemplate>
+                                            <MudTd DataLabel="@Localizer["Colisage"]">
+                                                <MudTextField @bind-Value="@CustomContext.QuatityOnLabel" Required Culture="_global.CustomCulture" />
+                                            </MudTd>
+
+                                            <MudTd DataLabel="@Localizer["Nombre D'Étiquettes"]">
+                                                <MudNumericField @bind-Value="@CustomContext.NbrEtiquettes" Required Culture="_global.CustomCulture" />
+                                            </MudTd>
+                                            <MudTd DataLabel="@Localizer["Lot"]">
+                                                <MudTextField @bind-Value="@CustomContext.IdentifiedStock" Required  />
+                                            </MudTd>
+                                            <MudTd DataLabel="@Localizer["Duplicata"]">
+                                                <MudNumericField @bind-Value="@CustomContext.Duplicata" Required Culture="_global.CustomCulture" />
+                                            </MudTd>
+                                        </RowEditingTemplate>
+
+                                    </MudTable>
+                                </MudCardContent>
+                            </MudPaper>
+
+
+
+                        </MudCard>
+                    </td>
+                </MudTr>
+            }
+
+        </ChildRowContent>
+
+        <PagerContent>
+            <TablePager />
+        </PagerContent>
+
+    </MudTable>
+    <MudScrollToTop>
+        <MudFab Color="Color.Tertiary" Icon="@Icons.Filled.ArrowCircleUp" />
+    </MudScrollToTop>
+</div>
